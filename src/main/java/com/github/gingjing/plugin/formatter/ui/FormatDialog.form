@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="com.github.gingjing.plugin.formatter.ui.FormatDialog">
+  <grid id="cbd77" binding="contentPane" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+    <margin top="0" left="0" bottom="0" right="0"/>
+    <constraints>
+      <xy x="48" y="54" width="809" height="431"/>
+    </constraints>
+    <properties/>
+    <border type="none"/>
+    <children>
+      <grid id="94766" layout-manager="BorderLayout" hgap="0" vgap="0">
+        <constraints>
+          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="1" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children>
+          <grid id="c9a79" layout-manager="FlowLayout" hgap="5" vgap="5" flow-align="0">
+            <constraints border-constraint="North"/>
+            <properties/>
+            <border type="none"/>
+            <children>
+              <component id="17aef" class="javax.swing.JLabel">
+                <constraints/>
+                <properties>
+                  <text value="类型："/>
+                </properties>
+              </component>
+              <component id="7bb90" class="javax.swing.JComboBox" binding="typeCbx">
+                <constraints/>
+                <properties/>
+              </component>
+              <component id="8761b" class="javax.swing.JLabel" binding="dbLabel">
+                <constraints/>
+                <properties>
+                  <text value="数据库类型："/>
+                </properties>
+              </component>
+              <component id="c9744" class="javax.swing.JComboBox" binding="dbCbx">
+                <constraints/>
+                <properties/>
+              </component>
+              <component id="9eca7" class="javax.swing.JLabel" binding="sqlParamLb">
+                <constraints/>
+                <properties>
+                  <text value="SQL语句参数："/>
+                </properties>
+              </component>
+              <component id="38bc" class="javax.swing.JTextField" binding="sqlParamTf">
+                <constraints/>
+                <properties/>
+              </component>
+              <component id="85436" class="javax.swing.JCheckBox" binding="mybatisLogCx">
+                <constraints/>
+                <properties>
+                  <text value="Mybatis Log"/>
+                </properties>
+              </component>
+            </children>
+          </grid>
+          <grid id="1f275" layout-manager="FlowLayout" hgap="5" vgap="5" flow-align="2">
+            <constraints border-constraint="South"/>
+            <properties/>
+            <border type="none"/>
+            <children>
+              <component id="9f0ae" class="javax.swing.JButton" binding="hlBtn">
+                <constraints/>
+                <properties>
+                  <text value="高亮显示"/>
+                </properties>
+              </component>
+              <component id="1618e" class="javax.swing.JButton" binding="formatBtn">
+                <constraints/>
+                <properties>
+                  <text value="格式化"/>
+                </properties>
+              </component>
+              <component id="df494" class="javax.swing.JButton" binding="cancelButton" default-binding="true">
+                <constraints/>
+                <properties>
+                  <text value="取消"/>
+                </properties>
+              </component>
+            </children>
+          </grid>
+          <grid id="87e8a" binding="centerPanel" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+            <margin top="0" left="0" bottom="0" right="0"/>
+            <constraints border-constraint="Center"/>
+            <properties/>
+            <border type="none"/>
+            <children>
+              <scrollpane id="14444">
+                <constraints>
+                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties/>
+                <border type="none"/>
+                <children>
+                  <grid id="8cd62" binding="textPanel" layout-manager="CardLayout" hgap="0" vgap="0">
+                    <constraints/>
+                    <properties/>
+                    <border type="none"/>
+                    <children>
+                      <component id="71a2c" class="javax.swing.JTextPane" binding="toFormatTp">
+                        <constraints>
+                          <card name="Card1"/>
+                        </constraints>
+                        <properties/>
+                      </component>
+                    </children>
+                  </grid>
+                </children>
+              </scrollpane>
+            </children>
+          </grid>
+        </children>
+      </grid>
+    </children>
+  </grid>
+</form>
