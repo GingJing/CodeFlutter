@@ -1,2 +1,2 @@
 # CodeFlutter
-A repository for my plugin
+A repository for my plug-ins
