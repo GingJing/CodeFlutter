@@ -1,6 +1,8 @@
 package com.github.gingjing.plugin.generator.code.comm;
 
 import com.github.gingjing.plugin.generator.code.tool.CollectionUtil;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import javax.swing.table.DefaultTableModel;
 import java.util.List;
@@ -13,6 +15,8 @@ import java.util.StringJoiner;
  * @version 1.0.0
  * @since 2018/07/17 13:10
  */
+@EqualsAndHashCode(callSuper = true)
+@Data
 public abstract class AbstractTableModel<T> extends DefaultTableModel {
     /**
      * 数据
@@ -116,33 +120,4 @@ public abstract class AbstractTableModel<T> extends DefaultTableModel {
      */
     protected abstract void setVal(T obj, int columnIndex, Object val);
 
-    public List<T> getData() {
-        return data;
-    }
-
-    public void setData(List<T> data) {
-        this.data = data;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        AbstractTableModel<?> that = (AbstractTableModel<?>) o;
-
-        return data != null ? data.equals(that.data) : that.data == null;
-    }
-
-    @Override
-    public int hashCode() {
-        return data != null ? data.hashCode() : 0;
-    }
-
-    @Override
-    public String toString() {
-        return new StringJoiner(", ", AbstractTableModel.class.getSimpleName() + "[", "]")
-                .add("data=" + data)
-                .toString();
-    }
 }

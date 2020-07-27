@@ -94,11 +94,11 @@ public class TemplateDebugPanel {
         if (!CollectionUtil.isEmpty(dataSourceList)) {
             dataSourceList.forEach(dbDataSource -> getTables(dbDataSource).forEach(table -> tableList.add(table.toString())));
         }
-        tableNameCbx.setSelectedIndex(0);
+        tableNameCbx.setSelectedItem(tableList.get(0));
 
         // 初始化调试动作组按钮
-        DbToolDebuggerAction dbToolDebuggerAction = new DbToolDebuggerAction(tableNameCbx, AllIcons.Actions.Run_anything);
-        SelectModelDebuggerAction selectModelDebuggerAction = new SelectModelDebuggerAction(tableList, AllIcons.Actions.Run_anything);
+        DbToolDebuggerAction dbToolDebuggerAction = new DbToolDebuggerAction(tableNameCbx, AllIcons.Actions.Rerun);
+        SelectModelDebuggerAction selectModelDebuggerAction = new SelectModelDebuggerAction(tableList, AllIcons.Actions.Rerun);
         DefaultActionGroup actionGroup = new DefaultActionGroup(dbToolDebuggerAction);
 
 
@@ -185,12 +185,12 @@ public class TemplateDebugPanel {
                 }
                 CacheDataUtils.getInstance().setSelectClass(psiClass);
                 CacheDataUtils.getInstance().setCreateMode(CreateModeEnum.SELECT_MODEL);
-                if (!MessageDialogBuilder.yesNo(MsgValue.TEMPLATE_DEBUG_INFO,
+                if (MessageDialogBuilder.yesNo(MsgValue.TEMPLATE_DEBUG_INFO,
                         "此类之前是否已使用此插件生成过代码？")
                         .isYes()) {
-                    new SetTableInfoByModelOrSqlDialog(project).open();
-                } else {
                     tableInfo = TableInfoService.getInstance(project).getTableInfoAndConfig(psiClass);
+                } else {
+                    new SetTableInfoByModelOrSqlDialog(project).open();
                 }
                 showDebugDialog(tableInfo);
             }

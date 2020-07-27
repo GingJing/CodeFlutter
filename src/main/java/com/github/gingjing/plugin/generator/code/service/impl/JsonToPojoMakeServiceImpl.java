@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 import java.util.Iterator;
 
 /**
- * json生成pojo类
+ * json生成pojo类, 此方式若类包含内部类则内部类会单独生成一个文件
  *
  * @author: gingjingdm
  * @date: 2020年 06月27日 19时59分

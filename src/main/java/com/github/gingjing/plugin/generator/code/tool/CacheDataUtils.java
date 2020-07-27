@@ -4,6 +4,8 @@ import com.github.gingjing.plugin.generator.code.entity.CreateModeEnum;
 import com.intellij.database.psi.DbTable;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiClass;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.collections.map.HashedMap;
 
 import java.util.*;
@@ -16,6 +18,8 @@ import java.util.*;
  * @version 1.0.0
  * @since 2018/07/17 13:10
  */
+@Getter
+@Setter
 public class CacheDataUtils {
     private volatile static CacheDataUtils cacheDataUtils;
 
@@ -51,6 +55,9 @@ public class CacheDataUtils {
     /** 当前create sql语句的database类型 */
     private String currDbType;
 
+    /** 数据库schema名称 */
+    private String schema;
+
     /** 选中的java类 */
     private PsiClass selectClass;
 
@@ -67,117 +74,5 @@ public class CacheDataUtils {
     public void setNewClass(Project project, Boolean isNewClass) {
         newClassMap.put(project.getBasePath(), isNewClass);
     }
-
-    public Map<String, Boolean> getNewClassMap() {
-        return newClassMap;
-    }
-
-    public void setNewClassMap(Map<String, Boolean> newClassMap) {
-        this.newClassMap = newClassMap;
-    }
-
-    public boolean isDebugging() {
-        return debugging;
-    }
-
-    public void setDebugging(boolean debugging) {
-        this.debugging = debugging;
-    }
-
-    public CreateModeEnum getCreateMode() {
-        return createMode;
-    }
-
-    public void setCreateMode(CreateModeEnum createMode) {
-        this.createMode = createMode;
-    }
-
-    public String getCurrCreateSql() {
-        return currCreateSql;
-    }
-
-    public void setCurrCreateSql(String currCreateSql) {
-        this.currCreateSql = currCreateSql;
-    }
-
-    public String getCurrDbType() {
-        return currDbType;
-    }
-
-    public void setCurrDbType(String currDbType) {
-        this.currDbType = currDbType;
-    }
-
-    public PsiClass getSelectClass() {
-        return selectClass;
-    }
-
-    public void setSelectClass(PsiClass selectClass) {
-        this.selectClass = selectClass;
-    }
-
-    public DbTable getSelectDbTable() {
-        return selectDbTable;
-    }
-
-    public void setSelectDbTable(DbTable selectDbTable) {
-        this.selectDbTable = selectDbTable;
-    }
-
-    public List<DbTable> getDbTableList() {
-        return dbTableList;
-    }
-
-    public void setDbTableList(List<DbTable> dbTableList) {
-        this.dbTableList = dbTableList;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        CacheDataUtils that = (CacheDataUtils) o;
-
-        if (createMode != that.createMode) {
-            return false;
-        }
-        if (!Objects.equals(currCreateSql, that.currCreateSql)) {
-            return false;
-        }
-        if (!Objects.equals(selectClass, that.selectClass)) {
-            return false;
-        }
-        if (!Objects.equals(selectDbTable, that.selectDbTable)) {
-            return false;
-        }
-
-        return Objects.equals(dbTableList, that.dbTableList);
-    }
-
-    @Override
-    public int hashCode() {
-        int result = createMode != null ? createMode.hashCode() : 0;
-        result = 31 * result + (currCreateSql != null ? currCreateSql.hashCode() : 0);
-        result = 31 * result + (selectClass != null ? selectClass.hashCode() : 0);
-        result = 31 * result + (selectDbTable != null ? selectDbTable.hashCode() : 0);
-        result = 31 * result + (dbTableList != null ? dbTableList.hashCode() : 0);
-        return result;
-    }
-
-    @Override
-    public String toString() {
-        return new StringJoiner(", ", CacheDataUtils.class.getSimpleName() + "[", "]")
-                .add("mode=" + createMode)
-                .add("currCreateSql='" + currCreateSql + "'")
-                .add("selectClass=" + selectClass)
-                .add("selectDbTable=" + selectDbTable)
-                .add("dbTableList=" + dbTableList)
-                .toString();
-    }
-
 
 }

@@ -1,6 +1,7 @@
 package com.github.gingjing.plugin.generator.code.service.impl;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.github.gingjing.plugin.common.utils.PluginStringUtil;
 import com.github.gingjing.plugin.generator.code.config.CodeFlutterGenCodeConfigComponent;
 import com.github.gingjing.plugin.generator.code.constants.MsgValue;
 import com.github.gingjing.plugin.generator.code.entity.*;
@@ -97,7 +98,7 @@ public class CodeGenerateServiceImpl implements CodeGenerateService {
             tableInfoList = Collections.singletonList(doCreateTableInfo);
         } else {
             // 获取所有选中的表信息
-            tableInfoList = tableInfoService.getTableInfoAndConfig(cacheDataUtils.getDbTableList());
+            tableInfoList = tableInfoService.getTableInfoListAndConfig(cacheDataUtils.getDbTableList());
         }
         return tableInfoList;
     }
@@ -146,10 +147,11 @@ public class CodeGenerateServiceImpl implements CodeGenerateService {
         // 生成代码
         for (TableInfo tableInfo : tableInfoList) {
             // 表名去除前缀
-            if (!StringUtils.isEmpty(tableInfo.getPreName()) && tableInfo.getObj().getName().startsWith(tableInfo.getPreName())) {
-                String newName = tableInfo.getObj().getName().replace(tableInfo.getPreName(), "");
-                tableInfo.setName(NameUtils.getInstance().getClassName(newName));
-            }
+            tableInfo.setName(NameUtils.getInstance().getClassName(excludePre(tableInfo)));
+//            if (!StringUtils.isEmpty(tableInfo.getPreName()) && tableInfo.getObj().getName().startsWith(tableInfo.getPreName())) {
+//                String newName = tableInfo.getObj().getName().replace(tableInfo.getPreName(), "");
+//                tableInfo.setName(NameUtils.getInstance().getClassName(newName));
+//            }
             // 构建参数
             Map<String, Object> param = getDefaultParam();
             // 其他参数
@@ -187,6 +189,18 @@ public class CodeGenerateServiceImpl implements CodeGenerateService {
                 }
                 new SaveFile(project, path, callback.getFileName(), code, callback.isReformat(), title).write();
             }
+        }
+    }
+
+    private String excludePre(TableInfo tableInfo) {
+        switch (cacheDataUtils.getCreateMode()) {
+            case DATABASE_TOOL:
+                return PluginStringUtil.removePrefix(tableInfo.getObj().getName(), tableInfo.getPreName());
+            case SELECT_MODEL:
+            case CREATE_SQL:
+                return PluginStringUtil.removePrefix(NameUtils.getInstance().hump2Underline(tableInfo.getName()), tableInfo.getPreName());
+            default:
+                return tableInfo.getName();
         }
     }
 

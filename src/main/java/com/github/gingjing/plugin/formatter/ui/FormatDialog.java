@@ -1,5 +1,6 @@
 package com.github.gingjing.plugin.formatter.ui;
 
+import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.util.JdbcConstants;
 import com.github.gingjing.plugin.common.utils.PluginJsonUtil;
 import com.github.gingjing.plugin.common.utils.PluginSqlUtil;
@@ -10,8 +11,8 @@ import com.github.gingjing.plugin.formatter.sqlformat.SqlFormatter;
 import com.github.gingjing.plugin.formatter.util.HtmlUtil;
 import com.github.gingjing.plugin.formatter.util.NoticeUtil;
 import com.github.gingjing.plugin.formatter.util.XmlUtil;
-import com.github.gingjing.plugin.generator.code.constants.MsgValue;
 import com.github.gingjing.plugin.generator.code.tool.StringUtils;
+import com.intellij.execution.impl.ConsoleViewUtil;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.EditorFactory;
@@ -27,66 +28,104 @@ public class FormatDialog extends JDialog {
 
     private static final Logger LOG = Logger.getInstance(FormatDialog.class);
 
-    /** 主面板 */
+    /**
+     * 主面板
+     */
     private JPanel contentPane;
 
-    /** 待格式化面板 */
+    /**
+     * 待格式化面板
+     */
     private JPanel centerPanel;
 
-    /** 格式化类型 */
+    /**
+     * 格式化类型
+     */
     private JComboBox<FormatEnum> typeCbx;
 
-    /** 文本面板 */
+    /**
+     * 文本面板
+     */
     private JPanel textPanel;
 
-    /** 格式化按钮 */
+    /**
+     * 格式化按钮
+     */
     private JButton formatBtn;
 
-    /** 取消按钮 */
+    /**
+     * 取消按钮
+     */
     private JButton cancelButton;
 
-    /** 数据库类型标签 */
+    /**
+     * 数据库类型标签
+     */
     private JLabel dbLabel;
 
-    /** 数据库类型选择框 */
+    /**
+     * 数据库类型选择框
+     */
     private JComboBox<String> dbCbx;
 
-    /** Mybatis log sql参数标签 */
+    /**
+     * Mybatis log sql参数标签
+     */
     private JLabel sqlParamLb;
 
-    /** sql参数文本域 */
+    /**
+     * sql参数文本域
+     */
     private JTextField sqlParamTf;
 
-    /** mybatis log sql确认框 */
+    /**
+     * mybatis log sql确认框
+     */
     private JCheckBox mybatisLogCx;
 
-    /** 需格式化内容 */
+    /**
+     * 需格式化内容
+     */
     private JTextPane toFormatTp;
 
-    /** 高亮显示按钮 */
+    /**
+     * 高亮显示按钮
+     */
     private JButton hlBtn;
 
-    /** 当前项目 */
+    /**
+     * 内容展示标签
+     */
+    private JLabel showContentLabel;
+
+    /**
+     * 当前项目
+     */
     private Project project;
 
-    /** 格式化字符串 */
+    /**
+     * 格式化字符串
+     */
     private String formatStr = "";
 
-    /** 当前选择的格式化类型 */
+    /**
+     * 当前选择的格式化类型
+     */
     private FormatEnum selectedType = FormatEnum.JSON;
 
-    /** 格式化后展示面板关闭标记 */
-    private boolean closeFlag;
+    /** 是否mybatis log */
+    private boolean mybatisLog;
 
-    /** 数据库类型 */
+    /**
+     * 数据库类型
+     */
     private String dbType;
 
     public FormatDialog(Editor editor, FormatEnum formatEnum) {
         this.project = editor.getProject();
         this.formatStr = StringUtils.isEmpty(editor.getSelectionModel().getSelectedText()) ? "" : editor.getSelectionModel().getSelectedText();
-        if (formatEnum != null) {
-            this.selectedType = formatEnum;
-        }
+        this.mybatisLog = ConsoleViewUtil.isConsoleViewEditor(editor);
+        this.selectedType = formatEnum != null ? formatEnum : FormatEnum.JSON;
         initDbList();
         initTextPanel();
         setContentPane(contentPane);
@@ -96,14 +135,15 @@ public class FormatDialog extends JDialog {
         addListener();
     }
 
-    private void initTextPanel(){
+    private void initTextPanel() {
         setSqlComponentVisible();
         this.textPanel.setFont(new Font("Microsoft YaHei", Font.BOLD, 14));
         this.centerPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         this.typeCbx.setModel(new DefaultComboBoxModel<>(FormatEnum.values()));
         this.typeCbx.setSelectedItem(selectedType);
         this.toFormatTp.setText(formatStr);
-        this.mybatisLogCx.setSelected(false);
+        this.mybatisLogCx.setSelected(mybatisLog);
+        this.showContentLabel.setText(StringUtils.capitalize(selectedType.getValue()) + "内容：");
     }
 
     private void initDbList() {
@@ -140,16 +180,6 @@ public class FormatDialog extends JDialog {
         this.mybatisLogCx.setVisible(selectedType.equals(FormatEnum.SQL));
     }
 
-    /**
-     * create editor with specified language and content
-     */
-    private Editor currEditor() {
-        if (StringUtils.isEmpty(this.toFormatTp.getText())) {
-            formatStr = "";
-        }
-        return ((FormatEnum) Objects.requireNonNull(typeCbx.getSelectedItem())).createEditor(project, formatStr);
-    }
-
     class TypeItemListener implements ItemListener {
 
         @Override
@@ -158,25 +188,19 @@ public class FormatDialog extends JDialog {
             if (selectedType == null) {
                 return;
             }
-            if (selectedType.equals(FormatEnum.SQL)) {
-                dbCbx.setVisible(true);
-                dbLabel.setVisible(true);
-                mybatisLogCx.setVisible(true);
-            } else {
-                setSqlComponentVisible();
-            }
+            showContentLabel.setText(StringUtils.capitalize(selectedType.getValue()) + "内容：");
+            setSqlComponentVisible();
         }
+
     }
+
     public void addListener() {
         typeCbx.addItemListener(new TypeItemListener());
 
         dbCbx.addActionListener(e -> dbType = (String) dbCbx.getSelectedItem());
 
         mybatisLogCx.addActionListener(e -> {
-            if (mybatisLogCx.isSelected()) {
-                sqlParamLb.setVisible(true);
-                sqlParamTf.setVisible(true);
-            }
+            mybatisLog = mybatisLogCx.isSelected();
         });
 
         hlBtn.addActionListener(e -> onHighlighter());
@@ -200,13 +224,18 @@ public class FormatDialog extends JDialog {
 
     }
 
-    /** 高亮显示弹框 */
+    /**
+     * 高亮显示弹框
+     */
     private void highlightFormattedDialog() {
         // 构建dialog
         DialogBuilder dialogBuilder = new DialogBuilder(project);
         dialogBuilder.setTitle("CodeFlutter Format");
         // 格式化后的编辑器
         Editor hasFormattedEditor = currEditor();
+        if (hasFormattedEditor == null) {
+            return;
+        }
         JComponent component = hasFormattedEditor.getComponent();
         component.setEnabled(true);
         component.setPreferredSize(new Dimension(800, 600));
@@ -215,16 +244,25 @@ public class FormatDialog extends JDialog {
         dialogBuilder.addCloseButton();
         dialogBuilder.addDisposable(() -> {
             //释放掉编辑框
-            if (hasFormattedEditor != null) {
-                EditorFactory.getInstance().releaseEditor(hasFormattedEditor);
-            }
+            EditorFactory.getInstance().releaseEditor(hasFormattedEditor);
             dialogBuilder.dispose();
-            closeFlag = true;
         });
         dialogBuilder.show();
     }
 
-    /** 高亮 */
+    /**
+     * 创建当前语言的编辑器
+     */
+    private Editor currEditor() {
+        if (StringUtils.isEmpty(this.toFormatTp.getText())) {
+            return null;
+        }
+        return selectedType.createEditor(project, this.toFormatTp.getText());
+    }
+
+    /**
+     * 高亮
+     */
     private void onHighlighter() {
         if (StringUtils.isEmpty(this.toFormatTp.getText())) {
             NoticeUtil.error("请输入数据");
@@ -233,7 +271,9 @@ public class FormatDialog extends JDialog {
         highlightFormattedDialog();
     }
 
-    /** 格式化 */
+    /**
+     * 格式化
+     */
     private void onOK() {
         if (StringUtils.isEmpty(this.toFormatTp.getText())) {
             NoticeUtil.error("请输入数据");
@@ -259,10 +299,6 @@ public class FormatDialog extends JDialog {
             return;
         }
         this.toFormatTp.setText(formatStr);
-
-        if (!closeFlag) {
-            NoticeUtil.error("请先关闭显示格式化后内容的对话框！");
-        }
     }
 
     private void onCancel() {
@@ -303,8 +339,10 @@ public class FormatDialog extends JDialog {
         return str;
     }
 
+    private static final String DEFAULT_PLACE_HOLDER = "?";
+
     /**
-     * 格式化json
+     * 格式化sql
      *
      * @param text 需要格式化的json文本
      * @return 格式化后的字符串
@@ -312,20 +350,26 @@ public class FormatDialog extends JDialog {
     private String formatSql(String text, String params) {
         String str = "";
         try {
-            if (this.mybatisLogCx.isSelected()) {
-                if (PluginStringUtil.isBlank(params)) {
-                    DefaultSqlFormatHandlerChain chain = new DefaultSqlFormatHandlerChain(text, "?", dbType);
-                    SqlFormatter sqlFormatter = chain.doProcess();
-                    sqlParamTf.setText(sqlFormatter.getSqlParamStr());
-                    str = sqlFormatter.getSqlEntity().getRealSql();
-                }
-                str = PluginSqlUtil.format(text, dbType, PluginSqlUtil.parser(params));
+            if (mybatisLog) {
+                DefaultSqlFormatHandlerChain chain = new DefaultSqlFormatHandlerChain(text, DEFAULT_PLACE_HOLDER, dbType);
+                SqlFormatter sqlFormatter = chain.doProcess();
+                sqlParamTf.setText(sqlFormatter.getSqlParamStr());
+                str = sqlFormatter.getSqlEntity().getRealSql();
             } else {
-                str = PluginSqlUtil.format(text, dbType);
+                str = PluginStringUtil.isBlank(params)
+                        ? PluginSqlUtil.format(text, dbType)
+                        : PluginSqlUtil.format(text, dbType, PluginSqlUtil.parser(params));
             }
-        } catch (Exception e) {
-            LOG.info(NoticeUtil.getStackTrace(e));
-            NoticeUtil.error("Sql格式有误");
+        } catch (Exception e1) {
+            LOG.info(NoticeUtil.getStackTrace(e1));
+            try {
+                str = PluginStringUtil.isBlank(params)
+                        ? PluginSqlUtil.format(text, dbType)
+                        : PluginSqlUtil.format(text, dbType, PluginSqlUtil.parser(params));
+            } catch (Exception e2) {
+                LOG.info(NoticeUtil.getStackTrace(e2));
+                NoticeUtil.error("Sql格式有误");
+            }
         }
         return str;
     }

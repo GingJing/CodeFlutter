@@ -1,107 +1,278 @@
 <idea-plugin>
-  <id>com.github.gingjing.CodeFlutter</id>
-  <name>CodeFlutter</name>
-  <version>1.0.0-RELEASE</version>
-  <vendor email="GingJingDM@163.com" url="https://github.gingjing.com">GindJingDM(mingyu)</vendor>
-  <description>
-      &lt;h2&gt;Note: This plugin only support the IntelliJ Version which since 192.5728.98&lt;/h2&gt;
+    <id>com.github.gingjing.CodeFlutter</id>
+    <name>CodeFlutter</name>
+    <version>1.0.1</version>
+    <vendor email="GingJingDM@163.com" url="https://github.gingjing.com">GindJingDM(mingyu)</vendor>
+
+    <description><![CDATA[
+      <h2>Note: This plugin only support the IntelliJ Version which since 192.5728.98</h2>
       This plug-in is mainly used to help programmers make coding easier in projects.
       It is a small plug-in that integrates some functions, such as:
-      &lt;ol&gt;
-       &lt;li&gt;Generate Code&lt;/li&gt;
-       &lt;li&gt;New Pojo From Json&lt;/li&gt;
-       &lt;li&gt;Format Sql, Xml, Json and HighLither&lt;/li&gt;
-       &lt;li&gt;Translate Online&lt;/li&gt;
-       &lt;li&gt;Generate JavaDoc Annotation&lt;/li&gt;
-       &lt;li&gt;Populate Mybatis Console Login Sql Placeholder With Value And Format&lt;/li&gt;
-      &lt;/ol&gt;
-      If you have some question please issue me &lt;a href="https://github.com/GingJing/CodeFlutter"&gt;CodeFlutter&lt;/a&gt;&lt;/br&gt;&lt;/br&gt;
-	  Part of the source code refers to the following plug-ins:&lt;/br&gt;
-	  &lt;ul&gt;
-	   &lt;li&gt;&lt;a href="https://github.com/makejavas/EasyCode"&gt;EasyCode&lt;/a&gt;&lt;/li&gt;
-	   &lt;li&gt;&lt;a href="https://github.com/starcwang/easy_javadoc"&gt;easy_javadoc&lt;/a&gt;&lt;/li&gt;
-	   &lt;li&gt;&lt;a href="https://github.com/jineshfrancs/AwesomePojoGenerator"&gt;AwesomePojoGenerator&lt;/a&gt;&lt;/li&gt;
-	   &lt;li&gt;&lt;a href="https://gitee.com/Chave-Z/CodingEasier"&gt;CodingEasier&lt;/a&gt;&lt;/li&gt;
-	  &lt;/ul&gt;
-	  If you like those plugin please star them.&lt;/br&gt;
+      <ol>
+       <li>Generate Code</li>
+       <li>New Pojo From Json</li>
+       <li>Format Sql, Xml, Json and HighLither</li>
+       <li>Translate Online</li>
+       <li>Generate JavaDoc Annotation</li>
+       <li>Populate Mybatis Console Login Sql Placeholder With Value And Format</li>
+      </ol>
+      If you have some question please issue me <a href="https://github.com/GingJing/CodeFlutter">CodeFlutter</a></br></br>
+	  Part of the source code refers to the following plug-ins:</br>
+	  <ul>
+	   <li><a href="https://github.com/makejavas/EasyCode">EasyCode</a></li>
+	   <li><a href="https://github.com/starcwang/easy_javadoc">easy_javadoc</a></li>
+	   <li><a href="https://github.com/zzz40500/GsonFormat">GsonFormat</a></li>
+	   <li><a href="https://github.com/jineshfrancs/AwesomePojoGenerator">AwesomePojoGenerator</a></li>
+	   <li><a href="https://gitee.com/Chave-Z/CodingEasier">CodingEasier</a></li>
+	  </ul>
+	  If you like those plugin please star them.</br>
 	  If you star me, 那就太棒了！！！！（不要问我为什么这里用中文，因为高兴啊！）
 
-    </description>
-  <change-notes>
-      Add change notes here.&lt;br&gt;
-      &lt;em&gt;most HTML tags may be used&lt;/em&gt;</change-notes>
-  <idea-version since-build="192.5728.98"/>
-  <depends>com.intellij.modules.platform</depends>
-  <depends>com.intellij.database</depends>
-  <depends>com.intellij.velocity</depends>
-  <extensions defaultExtensionNs="com.intellij">
-    <applicationService serviceImplementation="com.github.gingjing.plugin.generator.code.config.CodeFlutterGenCodeConfigComponent"/>
-    <applicationService serviceImplementation="com.github.gingjing.plugin.generator.doc.config.GenJavadocConfigComponent"/>
-    <applicationService serviceImplementation="com.github.gingjing.plugin.generator.doc.service.DocGeneratorService"/>
-    <applicationService serviceImplementation="com.github.gingjing.plugin.generator.doc.service.WriterService"/>
-    <applicationService serviceImplementation="com.github.gingjing.plugin.generator.doc.service.TranslatorService"/>
-    <applicationService serviceImplementation="com.github.gingjing.plugin.generator.doc.service.VariableGeneratorService"/>
-    <applicationService serviceInterface="com.github.gingjing.plugin.generator.code.service.JsonToPojoMakeService" serviceImplementation="com.github.gingjing.plugin.generator.code.service.impl.JsonToPojoMakeServiceImpl"/>
-    <projectService serviceInterface="com.github.gingjing.plugin.generator.code.service.TableInfoService" serviceImplementation="com.github.gingjing.plugin.generator.code.service.impl.TableInfoServiceImpl"/>
-    <projectService serviceInterface="com.github.gingjing.plugin.generator.code.service.CodeGenerateService" serviceImplementation="com.github.gingjing.plugin.generator.code.service.impl.CodeGenerateServiceImpl"/>
-    <applicationConfigurable dynamic="true" instance="com.github.gingjing.plugin.common.setting.MainSetting">
-      <configurable instance="com.github.gingjing.plugin.generator.code.ui.GenCodeConfigurableComposite"/>
-      <configurable instance="com.github.gingjing.plugin.generator.doc.view.GenJavadocConfigurableComposite"/>
-    </applicationConfigurable>
-    <velocity.globalVariableProvider implementation="com.github.gingjing.plugin.generator.code.provider.EasyCodeGlobalVariableProvider"/>
-  </extensions>
-  <actions>
-    <action id="com.github.gingjing.plugin.generator.code.actions.NewClassFromJsonAction" class="com.github.gingjing.plugin.generator.code.actions.NewClassFromJsonAction" text="Java Class From Json" description="Creates java classes from the json in the specified directory">
-      <add-to-group group-id="NewGroup" anchor="first"/>
-    </action>
-    <group id="com.github.gingjing.plugin.generator.code.actions" class="com.github.gingjing.plugin.generator.code.actions.DbToolGenCodeActionGroup" text="CodeFlutter-EasyCode" popup="true">
-      <add-to-group group-id="DatabaseViewPopupMenu" anchor="first"/>
-    </group>
-    <group id="com.github.gingjing.plugin.console.actions.CodeFlutterConsoleGroup" class="com.github.gingjing.plugin.console.actions.CodeFlutterConsoleGroup" text="CodeFlutter-Console" description="Handler the console" popup="true">
-      <add-to-group group-id="ConsoleView.PopupMenu" anchor="first"/>
-    </group>
-    <group id="com.github.gingjing.plugin.CodeFlutter.Group" text="Code Flutter..." description="To translate, gen code, gen doc, format some statement" popup="true">
-      <add-to-group group-id="EditorPopupMenu" anchor="first"/>
-      <group id="CodeFlutter.Converter.Group" text="Converter" description="Converter" popup="true">
-        <action id="CodeFlutter.Converter.Group.Java2Json" class="com.github.gingjing.plugin.converter.actions.TransformJavaToJsonAction" text="Java To Json"/>
-        <action id="CodeFlutter.Generator.Code.Group.GsonFormat" class="com.github.gingjing.plugin.gsonformat.MainAction" text="Json To Pojo"/>
-        <action id="CodeFlutter.Converter.Group.YmlPropertiesConverter" class="com.github.gingjing.plugin.converter.actions.ConverterYmlPropertiesFileAction" text="Yml Properties Converter"/>
-      </group>
-      <group id="CodeFlutter.Generator.Code.Group" text="Gen Code" description="Generate Hierarchy Code" popup="true">
-        <action id="CodeFlutter.Generator.Code.Group.CreateSql" class="com.github.gingjing.plugin.generator.code.actions.GenCodeBySqlAction" text="By Create Sql"/>
-        <action id="CodeFlutter.Generator.Code.Group.SelectModel" class="com.github.gingjing.plugin.generator.code.actions.GenCodeByModelAction" text="By Select Java"/>
-      </group>
-      <group id="CodeFlutter.Generator.Doc.Group" text="Gen Doc" description="Generate doc" popup="true">
-        <action id="CodeFlutter.Generator.Doc.Group.AllJavaDoc" class="com.github.gingjing.plugin.generator.doc.action.GenerateAllJavadocAction" text="All Javadoc"/>
-        <action id="CodeFlutter.Generator.Doc.Group.JavaDoc" class="com.github.gingjing.plugin.generator.doc.action.GenerateJavadocAction" text="Javadoc"/>
-      </group>
-      <group id="CodeFlutter.Translator.Group.Translate" text="Translate" description="Translate" popup="true">
-        <add-to-group group-id="ConsoleView.PopupMenu" anchor="first"/>
-        <action id="CodeFlutter.Formatter.Group.Translate" class="com.github.gingjing.plugin.translate.actions.GoogleTranslateAndShowAction" text="Google" description="Translate"/>
-      </group>
-      <group id="CodeFlutter.Translator.Group.Replace" text="Replace By Translate" description="Translate and Replace" popup="true">
-        <action id="CodeFlutter.Formatter.Group.Replace" class="com.github.gingjing.plugin.translate.actions.GoogleTranslateAndShowAction" text="Google" description="Translate and replace..."/>
-      </group>
-      <action id="CodeFlutter.Formatter.Group.CreateConstant" class="com.github.gingjing.plugin.formatter.stringAction.CreateConstantAction" text="Create a Constant" description="Create a Constant"/>
-      <group id="CodeFlutter.Formatter.Group.SwitchCase" text="Switch Case..." description="Group of String manipulation Switch case actions" popup="true">
-        <separator/>
-        <action id="CodeFlutter.Formatter.Group.SwitchCase.SwitchCase" class="com.github.gingjing.plugin.formatter.stringAction.AllCaseAction" text="All Case" description="Text to all case"/>
-        <separator/>
-        <action id="CodeFlutter.Formatter.Group.SwitchCase.Constant" class="com.github.gingjing.plugin.formatter.stringAction.ConstantAction" text="to CONSTANT" description="Text to constant"/>
-        <action id="CodeFlutter.Formatter.Group.SwitchCase.CamelCase" class="com.github.gingjing.plugin.formatter.stringAction.CamelCaseAction" text="to CamelCase" description="Text to camelCase"/>
-        <action id="CodeFlutter.Formatter.Group.SwitchCase.UnderscoreCase" class="com.github.gingjing.plugin.formatter.stringAction.UnderscoreCaseAction" text="to Underscore_Case" description="Text to underscoreCase"/>
-        <action id="CodeFlutter.Formatter.Group.SwitchCase.PascalCase" class="com.github.gingjing.plugin.formatter.stringAction.PascalCaseAction" text="to PascalCase" description="Text to pascalCase"/>
-        <action id="CodeFlutter.Formatter.Group.SwitchCase.UpperKebabCase" class="com.github.gingjing.plugin.formatter.stringAction.UpperKebabCaseAction" text="to Kebab-Case" description="Text to upperKebabCase"/>
-        <action id="CodeFlutter.Formatter.Group.SwitchCase.KebabCase" class="com.github.gingjing.plugin.formatter.stringAction.KebabCaseAction" text="to Kebab-Case" description="Text to kebabCase"/>
-        <action id="CodeFlutter.Formatter.Group.SwitchCase.Words" class="com.github.gingjing.plugin.formatter.stringAction.WordsAction" text="to Words" description="Text to words"/>
-        <separator/>
-        <action id="CodeFlutter.Formatter.Group.SwitchCase.UpperCase" class="com.github.gingjing.plugin.formatter.stringAction.UpperCaseAction" text="to UpperCase" description="Text to upperCase"/>
-        <action id="CodeFlutter.Formatter.Group.SwitchCase.LowerCase" class="com.github.gingjing.plugin.formatter.stringAction.LowerCaseAction" text="to LowerCase" description="Text to lowerCase"/>
-      </group>
-      <separator/>
-      <action id="CodeFlutter.Formatter.Group.NormalEditorFormat" class="com.github.gingjing.plugin.formatter.formatAction.NormalEditorFormatAction" text="Format" description="Format">
-        <add-to-group group-id="com.github.gingjing.plugin.CodeFlutter.Group"/>
-      </action>
-    </group>
-  </actions>
+    ]]></description>
+
+    <change-notes><![CDATA[
+      <p>Version 1.0.1 </p></br>
+      新增yml与properties文件互相转换时保留原文件；</br>
+      修复sql及javabean model生成代码的类型校验bug
+    ]]>
+    </change-notes>
+
+    <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
+    <idea-version since-build="192.5728.98"/>
+
+    <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
+         on how to target different products -->
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.database</depends>
+    <depends>com.intellij.velocity</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <!-- Add your extensions here -->
+
+        <!--实例化配置信息服务-->
+        <applicationService
+                serviceImplementation="com.github.gingjing.plugin.generator.code.config.CodeFlutterGenCodeConfigComponent"/>
+        <applicationService
+                serviceImplementation="com.github.gingjing.plugin.generator.doc.config.GenJavadocConfigComponent"/>
+        <!-- 插件服务 -->
+        <applicationService
+                serviceImplementation="com.github.gingjing.plugin.generator.doc.service.DocGeneratorService"/>
+        <applicationService serviceImplementation="com.github.gingjing.plugin.generator.doc.service.WriterService"/>
+        <applicationService serviceImplementation="com.github.gingjing.plugin.generator.doc.service.TranslatorService"/>
+        <applicationService
+                serviceImplementation="com.github.gingjing.plugin.generator.doc.service.VariableGeneratorService"/>
+        <applicationService serviceInterface="com.github.gingjing.plugin.generator.code.service.JsonToPojoMakeService"
+                            serviceImplementation="com.github.gingjing.plugin.generator.code.service.impl.JsonToPojoMakeServiceImpl"/>
+        <!--项目服务-->
+        <projectService serviceInterface="com.github.gingjing.plugin.generator.code.service.TableInfoService"
+                        serviceImplementation="com.github.gingjing.plugin.generator.code.service.impl.TableInfoServiceImpl"/>
+        <projectService serviceInterface="com.github.gingjing.plugin.generator.code.service.CodeGenerateService"
+                        serviceImplementation="com.github.gingjing.plugin.generator.code.service.impl.CodeGenerateServiceImpl"/>
+
+        <!--系统设置面板-->
+        <applicationConfigurable dynamic="true" instance="com.github.gingjing.plugin.common.setting.MainSetting">
+            <configurable instance="com.github.gingjing.plugin.generator.code.ui.GenCodeConfigurableComposite"/>
+            <configurable instance="com.github.gingjing.plugin.generator.doc.view.GenJavadocConfigurableComposite"/>
+        </applicationConfigurable>
+        <!-- velocity全局配置 -->
+        <velocity.globalVariableProvider
+                implementation="com.github.gingjing.plugin.generator.code.provider.EasyCodeGlobalVariableProvider"/>
+
+    </extensions>
+
+    <actions>
+        <!-- Add your actions here -->
+
+        <!-- New class from json -->
+        <action id="com.github.gingjing.plugin.generator.code.actions.NewClassFromJsonAction"
+                class="com.github.gingjing.plugin.generator.code.actions.NewClassFromJsonAction"
+                text="Java Class From Json"
+                description="Creates java classes from the json in the specified directory">
+            <add-to-group group-id="NewGroup" anchor="first"/>
+        </action>
+
+        <!-- generator by db tool -->
+        <group id="com.github.gingjing.plugin.generator.code.actions"
+               class="com.github.gingjing.plugin.generator.code.actions.DbToolGenCodeActionGroup"
+               text="CodeFlutter-EasyCode" popup="true">
+            <!--生成代码菜单-->
+            <add-to-group group-id="DatabaseViewPopupMenu" anchor="first"/>
+        </group>
+
+        <!-- console group -->
+        <group id="com.github.gingjing.plugin.console.actions.CodeFlutterConsoleGroup"
+               class="com.github.gingjing.plugin.console.actions.CodeFlutterConsoleGroup"
+               text="CodeFlutter-Console" description="Handler the console"
+               popup="true">
+            <add-to-group group-id="ConsoleView.PopupMenu" anchor="first"/>
+        </group>
+
+        <!-- editor group -->
+        <group id="com.github.gingjing.plugin.CodeFlutter.Group"
+               text="Code Flutter..."
+               description="To translate, gen code, gen doc, format some statement"
+               popup="true">
+            <add-to-group group-id="EditorPopupMenu" anchor="first"/>
+
+            <group id="CodeFlutter.Converter.Group"
+                   text="Converter"
+                   description="Converter"
+                   popup="true">
+                <action id="CodeFlutter.Converter.Group.Java2Json"
+                        class="com.github.gingjing.plugin.converter.actions.TransformJavaToJsonAction"
+                        text="Java To Json">
+                </action>
+                <action id="CodeFlutter.Generator.Code.Group.GsonFormat"
+                        class="com.github.gingjing.plugin.gsonformat.MainAction"
+                        text="Json To Pojo">
+                </action>
+                <action id="CodeFlutter.Converter.Group.YmlPropertiesConverter"
+                        class="com.github.gingjing.plugin.converter.actions.ConverterYmlPropertiesFileAction"
+                        text="Yml Properties Converter">
+                    <add-to-group group-id="ProjectViewPopupMenu" anchor="first"/>
+                </action>
+            </group>
+
+            <!-- generate code -->
+            <group id="CodeFlutter.Generator.Code.Group"
+                   text="Gen Code"
+                   description="Generate Hierarchy Code"
+                   popup="true">
+                <action id="CodeFlutter.Generator.Code.Group.CreateSql"
+                        class="com.github.gingjing.plugin.generator.code.actions.GenCodeBySqlAction"
+                        text="By Create Sql">
+                </action>
+                <action id="CodeFlutter.Generator.Code.Group.SelectModel"
+                        class="com.github.gingjing.plugin.generator.code.actions.GenCodeByModelAction"
+                        text="By Select Java">
+                </action>
+            </group>
+
+            <!-- generate doc -->
+            <group id="CodeFlutter.Generator.Doc.Group"
+                   text="Gen Doc"
+                   description="Generate doc"
+                   popup="true">
+                <action id="CodeFlutter.Generator.Doc.Group.AllJavaDoc"
+                        class="com.github.gingjing.plugin.generator.doc.action.GenerateAllJavadocAction"
+                        text="All Javadoc">
+                </action>
+                <action id="CodeFlutter.Generator.Doc.Group.JavaDoc"
+                        class="com.github.gingjing.plugin.generator.doc.action.GenerateJavadocAction"
+                        text="Javadoc">
+                </action>
+            </group>
+
+            <!-- translate group -->
+            <group id="CodeFlutter.Translator.Group.Translate"
+                   text="Translate"
+                   description="Translate"
+                   popup="true">
+                <add-to-group group-id="ConsoleView.PopupMenu" anchor="first"/>
+                <action id="CodeFlutter.Formatter.Group.Translate"
+                        class="com.github.gingjing.plugin.translate.actions.GoogleTranslateAndShowAction"
+                        text="Google"
+                        description="Translate">
+
+                </action>
+            </group>
+            <!-- translate then replace group -->
+            <group id="CodeFlutter.Translator.Group.Replace"
+                   text="Replace By Translate"
+                   description="Translate and Replace"
+                   popup="true">
+                <action id="CodeFlutter.Formatter.Group.Replace"
+                        class="com.github.gingjing.plugin.translate.actions.GoogleReplaceAndShowAction"
+                        text="Google"
+                        description="Translate and replace...">
+                </action>
+            </group>
+
+            <!-- create constant -->
+            <action id="CodeFlutter.Formatter.Group.CreateConstant"
+                    class="com.github.gingjing.plugin.formatter.stringAction.CreateConstantAction"
+                    text="Create a Constant"
+                    description="Create a Constant">
+            </action>
+
+            <!-- switch case to trans string -->
+            <group id="CodeFlutter.Formatter.Group.SwitchCase"
+                   text="Switch Case..."
+                   description="Group of String manipulation Switch case actions"
+                   popup="true">
+                <separator/>
+                <action id="CodeFlutter.Formatter.Group.SwitchCase.SwitchCase"
+                        class="com.github.gingjing.plugin.formatter.stringAction.AllCaseAction"
+                        text="All Case"
+                        description="Text to all case">
+                </action>
+                <separator/>
+                <action id="CodeFlutter.Formatter.Group.SwitchCase.Constant"
+                        class="com.github.gingjing.plugin.formatter.stringAction.ConstantAction"
+                        text="to CONSTANT"
+                        description="Text to constant">
+                </action>
+                <action id="CodeFlutter.Formatter.Group.SwitchCase.CamelCase"
+                        class="com.github.gingjing.plugin.formatter.stringAction.CamelCaseAction"
+                        text="to CamelCase"
+                        description="Text to camelCase">
+                </action>
+                <action id="CodeFlutter.Formatter.Group.SwitchCase.UnderscoreCase"
+                        class="com.github.gingjing.plugin.formatter.stringAction.UnderscoreCaseAction"
+                        text="to Underscore_Case"
+                        description="Text to underscoreCase">
+                </action>
+                <action id="CodeFlutter.Formatter.Group.SwitchCase.PascalCase"
+                        class="com.github.gingjing.plugin.formatter.stringAction.PascalCaseAction"
+                        text="to PascalCase"
+                        description="Text to pascalCase">
+                </action>
+                <action id="CodeFlutter.Formatter.Group.SwitchCase.UpperKebabCase"
+                        class="com.github.gingjing.plugin.formatter.stringAction.UpperKebabCaseAction"
+                        text="to Kebab-Case"
+                        description="Text to upperKebabCase">
+                </action>
+                <action id="CodeFlutter.Formatter.Group.SwitchCase.KebabCase"
+                        class="com.github.gingjing.plugin.formatter.stringAction.KebabCaseAction"
+                        text="to Kebab-Case"
+                        description="Text to kebabCase">
+                </action>
+                <action id="CodeFlutter.Formatter.Group.SwitchCase.Words"
+                        class="com.github.gingjing.plugin.formatter.stringAction.WordsAction"
+                        text="to Words"
+                        description="Text to words">
+                </action>
+                <separator/>
+                <action id="CodeFlutter.Formatter.Group.SwitchCase.UpperCase"
+                        class="com.github.gingjing.plugin.formatter.stringAction.UpperCaseAction"
+                        text="to UpperCase"
+                        description="Text to upperCase">
+                </action>
+                <action id="CodeFlutter.Formatter.Group.SwitchCase.LowerCase"
+                        class="com.github.gingjing.plugin.formatter.stringAction.LowerCaseAction"
+                        text="to LowerCase"
+                        description="Text to lowerCase">
+                </action>
+            </group>
+            <separator/>
+
+            <!-- formatter group -->
+            <action id="CodeFlutter.Formatter.Group.NormalEditorFormat"
+                    class="com.github.gingjing.plugin.formatter.formatAction.NormalEditorFormatAction"
+                    text="Format"
+                    description="Format">
+                <add-to-group group-id="com.github.gingjing.plugin.CodeFlutter.Group"/>
+            </action>
+
+        </group>
+
+        <!--<group id="CodeFlutter.EditorPopupMenu" text="Code Flutter"
+               description="Code flutter format"
+               popup="false">
+            <add-to-group group-id="EditorPopupMenu" anchor="after" relative-to-action="EditorToggleColumnMode"/>
+            <add-to-group group-id="ConsoleEditorPopupMenu" anchor="first"/>
+            <separator/>
+            <reference ref="com.github.gingjing.plugin.CodeFlutter.Group"/>
+        </group>-->
+    </actions>
 </idea-plugin>

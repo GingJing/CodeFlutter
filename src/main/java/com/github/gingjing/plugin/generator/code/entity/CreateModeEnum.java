@@ -3,6 +3,7 @@ package com.github.gingjing.plugin.generator.code.entity;
 import com.github.gingjing.plugin.generator.code.service.TableInfoService;
 import com.github.gingjing.plugin.generator.code.tool.CacheDataUtils;
 import com.github.gingjing.plugin.generator.code.tool.NameUtils;
+import com.github.gingjing.plugin.generator.code.tool.StringUtils;
 import com.intellij.database.util.DasUtil;
 
 /**
@@ -35,7 +36,7 @@ public enum CreateModeEnum {
 
         @Override
         public String getConfigFileName(TableInfo tableInfo) {
-            if (!"".equals(DasUtil.getSchema(tableInfo.getObj()))) {
+            if (!StringUtils.isEmpty(DasUtil.getSchema(tableInfo.getObj()))) {
                 String schemaName = DasUtil.getSchema(tableInfo.getObj());
                 return schemaName + "-" + tableInfo.getObj().getName() + ".json";
             }
@@ -51,7 +52,7 @@ public enum CreateModeEnum {
 
         @Override
         public String getConfigFileName(TableInfo tableInfo) {
-            if (!"".equals(DasUtil.getSchema(tableInfo.getObj()))) {
+            if (!StringUtils.isEmpty(DasUtil.getSchema(tableInfo.getObj()))) {
                 String schemaName = DasUtil.getSchema(tableInfo.getObj());
                 return schemaName + "-" + tableInfo.getObj().getName() + ".json";
             }

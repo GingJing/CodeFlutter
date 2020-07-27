@@ -1,5 +1,8 @@
 package com.github.gingjing.plugin.generator.code.tool;
 
+import com.github.gingjing.plugin.generator.code.entity.CreateModeEnum;
+
+import java.util.StringJoiner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -7,6 +10,7 @@ import java.util.regex.Pattern;
  * 命名工具类
  *
  * @author makejava
+ * @modify gingjingdm
  * @version 1.0.0
  * @since 2018/07/17 13:10
  */
@@ -84,12 +88,53 @@ public class NameUtils {
 
     /**
      * 通过java全名获取类名
+     * 1. 由create sql和IntelliJ DatabaseTool生成
+     * 2. 由select java class生成，判断：
+     *   a. 若包含泛型直接截取
+     *   b. 若包含泛型则特殊处理
      *
-     * @param fullName 全名
+     * @param fullName 全名 java.util.List<A></A>
      * @return 类名
      */
     public String getClsNameByFullName(String fullName) {
-        return fullName.substring(fullName.lastIndexOf('.') + 1);
+        if (!CreateModeEnum.SELECT_MODEL.equals(CacheDataUtils.getInstance().getCreateMode())) {
+            return fullName.substring(fullName.lastIndexOf('.') + 1);
+        }
+        return getShortType(fullName);
+    }
+
+    private static final String LEFT_ANGEL_BRACKET = "<";
+    private static final String DOT = ".";
+    private static final String COMMA = ",";
+
+
+    private String getShortType(String typeStr) {
+        if (!typeStr.contains(LEFT_ANGEL_BRACKET)) {
+            return typeStr.contains(DOT)
+                    ? typeStr.substring(typeStr.lastIndexOf(DOT) + 1)
+                    : typeStr;
+        }
+        String[] splitByLeftAngelBracket = typeStr.split(LEFT_ANGEL_BRACKET);
+        String leftStr = getShortType(splitByLeftAngelBracket[0]);
+        String rightStr = splitByLeftAngelBracket[1];
+        if (!rightStr.contains(COMMA)) {
+            String innerType = null;
+            if (rightStr.contains(LEFT_ANGEL_BRACKET)) {
+                innerType = getShortType(rightStr);
+            } else {
+                innerType = rightStr.contains(DOT)
+                        ? rightStr.substring(rightStr.lastIndexOf(DOT) + 1)
+                        : rightStr;
+            }
+            return leftStr + LEFT_ANGEL_BRACKET + innerType;
+        } else {
+            StringJoiner sj = new StringJoiner(", ");
+            String[] splitByComma = rightStr.split(COMMA);
+            for (String s : splitByComma) {
+                sj.add(getShortType(s));
+            }
+            return leftStr + LEFT_ANGEL_BRACKET + sj.toString();
+        }
     }
 
     /**

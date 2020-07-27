@@ -322,4 +322,68 @@ public class TemplateSettingPanel implements Configurable {
         }
     }
 
+
+    public CodeFlutterGenCodeConfigComponent getSettings() {
+        return settings;
+    }
+
+    public void setSettings(CodeFlutterGenCodeConfigComponent settings) {
+        this.settings = settings;
+    }
+
+    public TemplateEditor getTemplateEditor() {
+        return templateEditor;
+    }
+
+    public void setTemplateEditor(TemplateEditor templateEditor) {
+        this.templateEditor = templateEditor;
+    }
+
+    public TemplateDebugPanel getTemplateDebugPanel() {
+        return templateDebugPanel;
+    }
+
+    public void setTemplateDebugPanel(TemplateDebugPanel templateDebugPanel) {
+        this.templateDebugPanel = templateDebugPanel;
+    }
+
+    public BaseGroupPanel getBaseGroupPanel() {
+        return baseGroupPanel;
+    }
+
+    public void setBaseGroupPanel(BaseGroupPanel baseGroupPanel) {
+        this.baseGroupPanel = baseGroupPanel;
+    }
+
+    public BaseItemSelectPanel<Template> getBaseItemSelectPanel() {
+        return baseItemSelectPanel;
+    }
+
+    public void setBaseItemSelectPanel(BaseItemSelectPanel<Template> baseItemSelectPanel) {
+        this.baseItemSelectPanel = baseItemSelectPanel;
+    }
+
+    public Map<String, TemplateGroup> getGroup() {
+        return group;
+    }
+
+    public void setGroup(Map<String, TemplateGroup> group) {
+        this.group = group;
+    }
+
+    public String getCurrGroupName() {
+        return currGroupName;
+    }
+
+    public void setCurrGroupName(String currGroupName) {
+        this.currGroupName = currGroupName;
+    }
+
+    public Project getProject() {
+        return project;
+    }
+
+    public void setProject(Project project) {
+        this.project = project;
+    }
 }

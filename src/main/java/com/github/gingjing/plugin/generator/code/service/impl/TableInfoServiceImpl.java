@@ -1,13 +1,19 @@
 package com.github.gingjing.plugin.generator.code.service.impl;
 
+import com.alibaba.druid.stat.TableStat;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.gingjing.plugin.common.exception.CodeGenerateException;
 import com.github.gingjing.plugin.common.utils.PluginJsonUtil;
+import com.github.gingjing.plugin.common.utils.PluginPsiUtil;
 import com.github.gingjing.plugin.common.utils.PluginSqlUtil;
+import com.github.gingjing.plugin.common.utils.PluginStringUtil;
+import com.github.gingjing.plugin.common.visitor.ColumnTableAliasVisitor;
 import com.github.gingjing.plugin.generator.code.constants.MsgValue;
 import com.github.gingjing.plugin.generator.code.entity.*;
 import com.github.gingjing.plugin.generator.code.service.TableInfoService;
 import com.github.gingjing.plugin.generator.code.tool.*;
+import com.google.common.collect.Lists;
 import com.intellij.database.model.DasColumn;
 import com.intellij.database.model.DasNamespace;
 import com.intellij.database.model.DasTable;
@@ -19,18 +25,24 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.MessageDialogBuilder;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.Conditions;
-import com.intellij.psi.PsiClass;
-import com.intellij.psi.PsiField;
+import com.intellij.psi.*;
+import com.intellij.psi.impl.source.PsiClassReferenceType;
+import com.intellij.psi.util.PsiTypesUtil;
 import com.intellij.util.ArrayUtil;
 import com.intellij.util.ExceptionUtil;
 import com.intellij.util.containers.JBIterable;
+import org.apache.xmlbeans.impl.jam.internal.elements.PrimitiveClassImpl;
+import org.jetbrains.annotations.NotNull;
 
+import javax.lang.model.type.ReferenceType;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static com.github.gingjing.plugin.common.utils.PluginSqlUtil.TABLE_COMMENT;
+import static com.github.gingjing.plugin.common.utils.PluginSqlUtil.TABLE_NAME;
 import static com.github.gingjing.plugin.generator.code.constants.MsgValue.DATABASE_CONFIG_TYPE_NOT_EXIST;
 import static com.github.gingjing.plugin.generator.code.constants.MsgValue.TYPE_VALIDATOR;
 
@@ -39,8 +51,9 @@ import static com.github.gingjing.plugin.generator.code.constants.MsgValue.TYPE_
 /**
  * 表信息服务类
  *
- * @author gingjingdm
+ * @author makejava
  * @version 1.0.0
+ * @modify gingjingdm
  * @since 2018/09/02 12:13
  */
 public class TableInfoServiceImpl implements TableInfoService {
@@ -80,28 +93,26 @@ public class TableInfoServiceImpl implements TableInfoService {
         if (javaClass == null) {
             return null;
         }
-
         DbTable dbTable = ProjectUtils.getDbTableByPsiClass(project, javaClass);
-        if (dbTable == null) {
-//            int confirmationDialog = Messages.showTwoStepConfirmationDialog(
-//                    "IntelliJ IDEA DatabaseTool doesn't find this table ==>{%s}. " +
-//                            "Maybe curse of you have not use it as a tool to connect your database or ocurrs some exception during the connection. " +
-//                            "Do you continue making code?",
-//                    "CodeFlutter Generator: ",
-//                    "If you choose continue, you can't want to debug this code you will generate  Confirm continue?", Messages.getQuestionIcon());
-            return parseTableInfoByClass(javaClass);
-        } else {
+        if (dbTable != null) {
             return parseTableInfoByDbTable(dbTable);
         }
+        return parseTableInfoByClass(javaClass);
+
     }
 
-
-    @Override
-    public TableInfo parseTableInfoByClass(PsiClass psiClass) {
+    /**
+     * 通过建表语句获取表信息
+     *
+     * @param psiClass javabean类
+     */
+    private TableInfo parseTableInfoByClass(PsiClass psiClass) {
         TableInfo tableInfo = new TableInfo();
+        tableInfo.setSchemaName(CacheDataUtils.getInstance().getSchema());
         // Doc注释
         if (psiClass.getDocComment() != null) {
-            tableInfo.setComment(psiClass.getDocComment().getText());
+            List<PsiElement> elements = Lists.newArrayList(psiClass.getDocComment().getChildren());
+            tableInfo.setComment(PluginPsiUtil.getOnlyCommentContent(elements));
         }
         // 设置类名
         tableInfo.setName(psiClass.getName());
@@ -122,7 +133,8 @@ public class TableInfoServiceImpl implements TableInfoService {
             columnInfo.setType(psiField.getType().getCanonicalText());
             // Doc注释
             if (psiField.getDocComment() != null) {
-                columnInfo.setComment(psiField.getDocComment().getText());
+                List<PsiElement> elements = Lists.newArrayList(psiField.getDocComment().getChildren());
+                columnInfo.setComment(PluginPsiUtil.getOnlyCommentContent(elements));
             }
             // 默认为false
             columnInfo.setPk(false);
@@ -140,18 +152,42 @@ public class TableInfoServiceImpl implements TableInfoService {
 
     @Override
     public TableInfo getTableInfoBySql(String createSql) {
-        if (StringUtils.isEmpty(createSql) || (!createSql.contains("create") && !createSql.contains("CREATE"))) {
+        if (PluginSqlUtil.isIllegalCreateSql(createSql)) {
             return null;
         }
-        return parseTableInfoBySql(createSql);
+        ColumnTableAliasVisitor visitor =
+                PluginSqlUtil.parseAndGetVisitor(createSql, CacheDataUtils.getInstance().getCurrDbType());
+        String tableName = visitor.map.get(TABLE_NAME);
+        if (!StringUtils.isEmpty(tableName)) {
+            DbTable dbTable = ProjectUtils.getDbTableByTableName(project, tableName);
+            if (dbTable != null) {
+                return parseTableInfoByDbTable(dbTable);
+            }
+        }
+        return setTableInfoByVisitor(visitor);
     }
 
-    private TableInfo parseTableInfoBySql(String currCreateSql) {
-        try {
-            return PluginSqlUtil.initTableAndColumn(currCreateSql, CacheDataUtils.getInstance().getCurrDbType());
-        } catch (Exception e) {
-            return new TableInfo();
+    private TableInfo setTableInfoByVisitor(ColumnTableAliasVisitor visitor) {
+        TableInfo tableInfo = new TableInfo();
+        tableInfo.setSchemaName(CacheDataUtils.getInstance().getSchema());
+        if (PluginStringUtil.isBlank(visitor.map.get(TABLE_NAME))) {
+            throw new CodeGenerateException("代码生成失败，表名不能为空");
         }
+        tableInfo.setName(NameUtils.getInstance().getClassName(visitor.map.get(TABLE_NAME)));
+        tableInfo.setComment(visitor.map.get(TABLE_COMMENT));
+        PluginSqlUtil.setColumns4TableInfo(visitor, tableInfo);
+        return tableInfo;
+    }
+
+    /**
+     * 通过建表语句获取表信息
+     *
+     * @param currCreateSql 建表语句
+     */
+    private TableInfo parseTableInfoBySql(String currCreateSql) {
+        ColumnTableAliasVisitor visitor =
+                PluginSqlUtil.parseAndGetVisitor(currCreateSql, CacheDataUtils.getInstance().getCurrDbType());
+        return setTableInfoByVisitor(visitor);
     }
 
     @Override
@@ -172,6 +208,8 @@ public class TableInfoServiceImpl implements TableInfoService {
         TableInfo tableInfo = new TableInfo();
         // 设置原属对象
         tableInfo.setObj(dbTable);
+        // 设置schema名称
+        tableInfo.setSchemaName(DasUtil.getSchema(dbTable));
         // 设置类名
         tableInfo.setName(nameUtils.getClassName(dbTable.getName()));
         // 设置注释
@@ -370,8 +408,7 @@ public class TableInfoServiceImpl implements TableInfoService {
         for (String typeName : typeNames) {
             for (TypeMapper typeMapper : typeMapperList) {
                 // 不区分大小写查找类型
-                if (Pattern.compile(typeMapper.getColumnType(), Pattern.CASE_INSENSITIVE).matcher(typeName).matches()
-                        || typeMapper.getJavaType().equalsIgnoreCase(typeName)) {
+                if (hasTypeMapping(typeName, typeMapper)) {
                     continue FLAG;
                 }
             }
@@ -387,11 +424,30 @@ public class TableInfoServiceImpl implements TableInfoService {
     }
 
     /**
-     * 类型校验
+     * 是否存在映射
      *
-     * @param psiClass 选中的javabean类
-     * @return 是否验证通过
+     * @param typeName   当前名称
+     * @param typeMapper 映射实体
+     * @return 是否存在映射
      */
+    private boolean hasTypeMapping(String typeName, TypeMapper typeMapper) {
+        if (Pattern.compile(typeMapper.getColumnType(), Pattern.CASE_INSENSITIVE).matcher(typeName).matches()) {
+            return true;
+        }
+        if (typeMapper.getJavaType().equalsIgnoreCase(typeName)) {
+            return true;
+        }
+        if (CacheDataUtils.getInstance().getCreateMode().equals(CreateModeEnum.SELECT_MODEL)) {
+            // 如果是选择javabean，则字段类型为自定义类，直接返回true。否则前面就应该添加至TypeMapper的java type中。
+            return !PrimitiveClassImpl.isPrimitive(typeName)
+                    && !StringUtils.isEmpty(PsiTypesUtil.unboxIfPossible(typeName))
+                    && !CommonClassNames.JAVA_LANG_STRING.equals(typeName);
+        }
+        return true;
+    }
+
+
+    @Override
     public boolean typeValidator(PsiClass psiClass) {
         PsiField[] allFields = psiClass.getAllFields();
         List<TypeMapper> typeMapperList = CurrGroupUtils.getCurrTypeMapperGroup().getElementList();
@@ -399,19 +455,27 @@ public class TableInfoServiceImpl implements TableInfoService {
             Messages.showErrorDialog(String.format("该java类%s，没有字段，请先添加！", psiClass.getQualifiedName()), TYPE_VALIDATOR);
             return false;
         }
-        List<String> typeNames = Arrays.stream(allFields).map(f -> f.getType().getCanonicalText()).collect(Collectors.toList());
-       /* for (PsiField field : allFields) {
-            PsiType type = field.getType();
-            String typeName = type.getPresentableText();*/
+        List<String> typeNames = Arrays.stream(allFields)
+                .map(f -> f.getType().getCanonicalText())
+                .collect(Collectors.toList());
         return checkIfAddTypeMapper(typeMapperList, typeNames);
     }
 
-    /**
-     * 类型校验
-     *
-     * @param dbTable 原始表对象
-     * @return 是否验证通过
-     */
+    @Override
+    public boolean typeValidator(String createSql) {
+        ColumnTableAliasVisitor visitor = PluginSqlUtil.parseAndGetVisitor(createSql, CacheDataUtils.getInstance().getCurrDbType());
+        Collection<TableStat.Column> columns = visitor.getColumns();
+        List<TypeMapper> typeMapperList = CurrGroupUtils.getCurrTypeMapperGroup().getElementList();
+        if (CollectionUtil.isEmpty(columns)) {
+            throw new IllegalArgumentException(String.format("该建表语句%s，没有字段，请先添加！", createSql));
+        }
+        List<String> typeNames = columns
+                .stream()
+                .map(TableStat.Column::getDataType)
+                .collect(Collectors.toList());
+        return checkIfAddTypeMapper(typeMapperList, typeNames);
+    }
+
     @Override
     public boolean typeValidator(DbTable dbTable) {
         // 处理所有列

@@ -9,6 +9,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiFileFactory;
 import com.intellij.testFramework.LightVirtualFile;
+import lombok.Data;
 
 import java.util.StringJoiner;
 
@@ -19,6 +20,7 @@ import java.util.StringJoiner;
  * @version 1.0.0
  * @since 2020/04/20 22:54
  */
+@Data
 public class SaveFile {
     private static final Logger LOG = Logger.getInstance(SaveFile.class);
     /**
@@ -78,101 +80,4 @@ public class SaveFile {
         FileUtils.getInstance().write(this);
     }
 
-    public Project getProject() {
-        return project;
-    }
-
-    public void setProject(Project project) {
-        this.project = project;
-    }
-
-    public String getPath() {
-        return path;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
-    }
-
-    public VirtualFile getVirtualFile() {
-        return virtualFile;
-    }
-
-    public void setVirtualFile(VirtualFile virtualFile) {
-        this.virtualFile = virtualFile;
-    }
-
-    public PsiFile getFile() {
-        return file;
-    }
-
-    public void setFile(PsiFile file) {
-        this.file = file;
-    }
-
-    public boolean isReformat() {
-        return reformat;
-    }
-
-    public void setReformat(boolean reformat) {
-        this.reformat = reformat;
-    }
-
-    public PsiFile getPsiFile() {
-        return psiFile;
-    }
-
-    public void setPsiFile(PsiFile psiFile) {
-        this.psiFile = psiFile;
-    }
-
-    public boolean isOperateTitle() {
-        return operateTitle;
-    }
-
-    public void setOperateTitle(boolean operateTitle) {
-        this.operateTitle = operateTitle;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        SaveFile saveFile = (SaveFile) o;
-
-        if (reformat != saveFile.reformat) return false;
-        if (operateTitle != saveFile.operateTitle) return false;
-        if (project != null ? !project.equals(saveFile.project) : saveFile.project != null) return false;
-        if (path != null ? !path.equals(saveFile.path) : saveFile.path != null) return false;
-        if (virtualFile != null ? !virtualFile.equals(saveFile.virtualFile) : saveFile.virtualFile != null)
-            return false;
-        if (file != null ? !file.equals(saveFile.file) : saveFile.file != null) return false;
-        return psiFile != null ? psiFile.equals(saveFile.psiFile) : saveFile.psiFile == null;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = project != null ? project.hashCode() : 0;
-        result = 31 * result + (path != null ? path.hashCode() : 0);
-        result = 31 * result + (virtualFile != null ? virtualFile.hashCode() : 0);
-        result = 31 * result + (file != null ? file.hashCode() : 0);
-        result = 31 * result + (reformat ? 1 : 0);
-        result = 31 * result + (psiFile != null ? psiFile.hashCode() : 0);
-        result = 31 * result + (operateTitle ? 1 : 0);
-        return result;
-    }
-
-    @Override
-    public String toString() {
-        return new StringJoiner(", ", SaveFile.class.getSimpleName() + "[", "]")
-                .add("project=" + project)
-                .add("path='" + path + "'")
-                .add("virtualFile=" + virtualFile)
-                .add("file=" + file)
-                .add("reformat=" + reformat)
-                .add("psiFile=" + psiFile)
-                .add("operateTitle=" + operateTitle)
-                .toString();
-    }
 }

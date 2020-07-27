@@ -26,8 +26,9 @@ import static com.github.gingjing.plugin.common.utils.PluginSqlUtil.TABLE_NAME;
  */
 public class ColumnTableAliasVisitor extends SchemaStatVisitor {
 
-
-
+    /**
+     * 数据库类型
+     */
     private String dbType;
 
     public ColumnTableAliasVisitor(String dbType) {
@@ -40,42 +41,59 @@ public class ColumnTableAliasVisitor extends SchemaStatVisitor {
 
     @Override
     public boolean visit(SQLColumnDefinition x) {
+        if (x == null) {
+            return true;
+        }
         String tableName = null;
         SQLObject parent = x.getParent();
 
         if (parent instanceof SQLCreateTableStatement) {
             tableName = ((SQLCreateTableStatement) parent).getName().toString();
-            SQLExpr tableComment = ((SQLCreateTableStatement) parent).getComment();
-            if (tableComment.hasAfterComment()) {
-                String comment = tableComment.getAfterCommentsDirect().get(0);
-                map.put(TABLE_COMMENT, comment);
-            } else if (tableComment.hasBeforeComment()) {
-                String comment = tableComment.getBeforeCommentsDirect().get(0);
-                map.put(TABLE_COMMENT, comment);
-            }
+            putTableCommentIfExists((SQLCreateTableStatement) parent);
         }
         if (tableName == null) {
             return true;
-        } else {
-            map.put(TABLE_NAME, tableName);
-            String columnName = x.getName().toString();
-            String normalize = PluginSqlUtil.normalize(columnName);
-            String comment = x.getComment() == null ? normalize : x.getComment().toString();
-            map.put(normalize, PluginStringUtil.isBlank(comment) ? normalize : PluginSqlUtil.normalize(comment));
-            TableStat.Column column = this.addColumn(tableName, columnName);
-            if (x.getDataType() != null) {
-                column.setDataType(x.getDataType().getName());
-            }
+        }
+        map.put(TABLE_NAME, tableName);
 
-            for (Object item : x.getConstraints()) {
-                if (item instanceof SQLPrimaryKey) {
-                    column.setPrimaryKey(true);
-                } else if (item instanceof SQLUnique) {
-                    column.setUnique(true);
-                }
-            }
+        String columnName = x.getName().toString();
+        String normalize = PluginSqlUtil.normalize(columnName);
+        String comment = x.getComment() == null ? normalize : x.getComment().toString();
+        map.put(normalize, PluginStringUtil.isBlank(comment) ? normalize : PluginSqlUtil.normalize(comment));
 
-            return false;
+        TableStat.Column column = this.addColumn(tableName, columnName);
+        if (x.getDataType() != null) {
+            column.setDataType(x.getDataType().getName());
+        }
+
+        for (Object item : x.getConstraints()) {
+            if (item instanceof SQLPrimaryKey) {
+                column.setPrimaryKey(true);
+            } else if (item instanceof SQLUnique) {
+                column.setUnique(true);
+            }
+        }
+
+        return false;
+
+    }
+
+    /**
+     * 如果存在将表注释放进map
+     *
+     * @param createTableStatement 建表语句
+     */
+    private void putTableCommentIfExists(SQLCreateTableStatement createTableStatement) {
+        SQLExpr tableComment = createTableStatement.getComment();
+        if (tableComment == null) {
+            return;
+        }
+        if (tableComment.hasAfterComment()) {
+            String comment = tableComment.getAfterCommentsDirect().get(0);
+            map.put(TABLE_COMMENT, comment);
+        } else if (tableComment.hasBeforeComment()) {
+            String comment = tableComment.getBeforeCommentsDirect().get(0);
+            map.put(TABLE_COMMENT, comment);
         }
     }
 

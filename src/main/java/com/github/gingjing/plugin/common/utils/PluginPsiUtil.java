@@ -1,6 +1,7 @@
 package com.github.gingjing.plugin.common.utils;
 
 import com.github.gingjing.plugin.common.constants.PluginFileConstants;
+import com.github.gingjing.plugin.generator.code.tool.CollectionUtil;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
@@ -8,7 +9,16 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.actionSystem.LangDataKeys;
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.psi.JavaDocTokenType;
+import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
+import com.intellij.psi.PsiWhiteSpace;
+import com.intellij.psi.javadoc.PsiDocTag;
+import com.intellij.psi.javadoc.PsiDocToken;
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.List;
+import java.util.Objects;
 
 import static com.github.gingjing.plugin.converter.constants.MsgConstants.NO_FILE_SELECTED;
 import static com.github.gingjing.plugin.converter.constants.MsgConstants.SELECT_FILE_FIRST;
@@ -56,6 +66,65 @@ public class PluginPsiUtil {
         return !isJavaFile(event) && !isXmlFile(event) && !isSqlFile(event);
     }
 
+    /**
+     * 获取psiElement的javadoc的内容，除去/*、*和@since、@date等标签
+     *
+     * @param elements doc子元素列表
+     * @return 只有内容的注释字符串
+     */
+    public static String getOnlyCommentContent(List<PsiElement> elements) {
+        if (CollectionUtil.isEmpty(elements)) {
+            return null;
+        }
+        StringBuilder content = new StringBuilder();
+        for (PsiElement element : elements) {
+            content.append(getOnlyCommentContent(element));
+        }
+        return content.toString();
+    }
+
+    private static final String DOC_COMMENT_DATA_STRING = "PsiDocToken:DOC_COMMENT_DATA";
+
+    private static final String PSI_WHITE_SPACE = "PsiWhiteSpace";
+
+    /**
+     * 获取psiElement的javadoc的内容，除去/*、*和@since、@date等标签
+     *
+     * @param element doc子元素
+     * @return 只有内容的注释字符串
+     */
+    public static String getOnlyCommentContent(PsiElement element) {
+        if (element == null) {
+            return "";
+        }
+        if (DOC_COMMENT_DATA_STRING.equalsIgnoreCase(element.toString())) {
+            return element.getText();
+        } else if (PSI_WHITE_SPACE.equalsIgnoreCase(element.toString())) {
+            return element.getText();
+        } else {
+            return "";
+        }
+    }
+
+    /**
+     * 构建描述
+     *
+     * @param elements 元素
+     * @param desc 描述
+     * @return {@link String}
+     */
+    private String buildDesc(List<PsiElement> elements, String desc) {
+        for (PsiElement element : elements) {
+            if (!"PsiDocToken:DOC_COMMENT_DATA".equalsIgnoreCase(element.toString())) {
+                continue;
+            }
+            String source = element.getText().replaceAll("[/* \n]+", StringUtils.EMPTY);
+            if (Objects.equals(source, desc)) {
+                return null;
+            }
+        }
+        return desc;
+    }
     /**
      * 获取选择中的文件
      *

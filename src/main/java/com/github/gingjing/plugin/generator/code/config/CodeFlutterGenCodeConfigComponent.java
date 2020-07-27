@@ -10,6 +10,7 @@ import com.intellij.openapi.components.Storage;
 import com.intellij.util.ExceptionUtil;
 import com.intellij.util.xmlb.XmlSerializerUtil;
 import com.intellij.util.xmlb.annotations.Transient;
+import lombok.Data;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -24,6 +25,7 @@ import java.util.*;
  * @version 1.0.0
  * @since 2018/07/18 09:33
  */
+@Data
 @State(name = "CodeFlutterGenCodeSetting", storages = @Storage("code-flutter-gen-code.xml"))
 public class CodeFlutterGenCodeConfigComponent implements PersistentStateComponent<CodeFlutterGenCodeConfigComponent> {
     /**
@@ -252,156 +254,4 @@ public class CodeFlutterGenCodeConfigComponent implements PersistentStateCompone
 
     }
 
-    public String getVersion() {
-        return version;
-    }
-
-    public void setVersion(String version) {
-        this.version = version;
-    }
-
-    public String getCurrTypeMapperGroupName() {
-        return currTypeMapperGroupName;
-    }
-
-    public void setCurrTypeMapperGroupName(String currTypeMapperGroupName) {
-        this.currTypeMapperGroupName = currTypeMapperGroupName;
-    }
-
-    public Map<String, TypeMapperGroup> getTypeMapperGroupMap() {
-        return typeMapperGroupMap;
-    }
-
-    public void setTypeMapperGroupMap(Map<String, TypeMapperGroup> typeMapperGroupMap) {
-        this.typeMapperGroupMap = typeMapperGroupMap;
-    }
-
-    public String getCurrTemplateGroupName() {
-        return currTemplateGroupName;
-    }
-
-    public void setCurrTemplateGroupName(String currTemplateGroupName) {
-        this.currTemplateGroupName = currTemplateGroupName;
-    }
-
-    public Map<String, TemplateGroup> getTemplateGroupMap() {
-        return templateGroupMap;
-    }
-
-    public void setTemplateGroupMap(Map<String, TemplateGroup> templateGroupMap) {
-        this.templateGroupMap = templateGroupMap;
-    }
-
-    public String getCurrColumnConfigGroupName() {
-        return currColumnConfigGroupName;
-    }
-
-    public void setCurrColumnConfigGroupName(String currColumnConfigGroupName) {
-        this.currColumnConfigGroupName = currColumnConfigGroupName;
-    }
-
-    public Map<String, ColumnConfigGroup> getColumnConfigGroupMap() {
-        return columnConfigGroupMap;
-    }
-
-    public void setColumnConfigGroupMap(Map<String, ColumnConfigGroup> columnConfigGroupMap) {
-        this.columnConfigGroupMap = columnConfigGroupMap;
-    }
-
-    public String getCurrGlobalConfigGroupName() {
-        return currGlobalConfigGroupName;
-    }
-
-    public void setCurrGlobalConfigGroupName(String currGlobalConfigGroupName) {
-        this.currGlobalConfigGroupName = currGlobalConfigGroupName;
-    }
-
-    public Map<String, GlobalConfigGroup> getGlobalConfigGroupMap() {
-        return globalConfigGroupMap;
-    }
-
-    public void setGlobalConfigGroupMap(Map<String, GlobalConfigGroup> globalConfigGroupMap) {
-        this.globalConfigGroupMap = globalConfigGroupMap;
-    }
-
-    public String getAuthor() {
-        return author;
-    }
-
-    public void setAuthor(String author) {
-        this.author = author;
-    }
-
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-
-        CodeFlutterGenCodeConfigComponent settings = (CodeFlutterGenCodeConfigComponent) o;
-
-        if (!Objects.equals(version, settings.version)) {
-            return false;
-        }
-        if (!Objects.equals(currTypeMapperGroupName, settings.currTypeMapperGroupName)) {
-            return false;
-        }
-        if (!Objects.equals(typeMapperGroupMap, settings.typeMapperGroupMap)) {
-            return false;
-        }
-        if (!Objects.equals(currTemplateGroupName, settings.currTemplateGroupName)) {
-            return false;
-        }
-        if (!Objects.equals(templateGroupMap, settings.templateGroupMap)) {
-            return false;
-        }
-        if (!Objects.equals(currColumnConfigGroupName, settings.currColumnConfigGroupName)) {
-            return false;
-        }
-        if (!Objects.equals(columnConfigGroupMap, settings.columnConfigGroupMap)) {
-            return false;
-        }
-        if (!Objects.equals(currGlobalConfigGroupName, settings.currGlobalConfigGroupName)) {
-            return false;
-        }
-        if (!Objects.equals(globalConfigGroupMap, settings.globalConfigGroupMap)) {
-            return false;
-        }
-        return Objects.equals(author, settings.author);
-    }
-
-    @Override
-    public int hashCode() {
-        int result = version != null ? version.hashCode() : 0;
-        result = 31 * result + (currTypeMapperGroupName != null ? currTypeMapperGroupName.hashCode() : 0);
-        result = 31 * result + (typeMapperGroupMap != null ? typeMapperGroupMap.hashCode() : 0);
-        result = 31 * result + (currTemplateGroupName != null ? currTemplateGroupName.hashCode() : 0);
-        result = 31 * result + (templateGroupMap != null ? templateGroupMap.hashCode() : 0);
-        result = 31 * result + (currColumnConfigGroupName != null ? currColumnConfigGroupName.hashCode() : 0);
-        result = 31 * result + (columnConfigGroupMap != null ? columnConfigGroupMap.hashCode() : 0);
-        result = 31 * result + (currGlobalConfigGroupName != null ? currGlobalConfigGroupName.hashCode() : 0);
-        result = 31 * result + (globalConfigGroupMap != null ? globalConfigGroupMap.hashCode() : 0);
-        result = 31 * result + (author != null ? author.hashCode() : 0);
-        return result;
-    }
-
-    @Override
-    public String toString() {
-        return new StringJoiner(", ", CodeFlutterGenCodeConfigComponent.class.getSimpleName() + "[", "]")
-                .add("version='" + version + "'")
-                .add("currTypeMapperGroupName='" + currTypeMapperGroupName + "'")
-                .add("typeMapperGroupMap=" + typeMapperGroupMap)
-                .add("currTemplateGroupName='" + currTemplateGroupName + "'")
-                .add("templateGroupMap=" + templateGroupMap)
-                .add("currColumnConfigGroupName='" + currColumnConfigGroupName + "'")
-                .add("columnConfigGroupMap=" + columnConfigGroupMap)
-                .add("currGlobalConfigGroupName='" + currGlobalConfigGroupName + "'")
-                .add("globalConfigGroupMap=" + globalConfigGroupMap)
-                .add("author='" + author + "'")
-                .toString();
-    }
 }

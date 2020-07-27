@@ -1,11 +1,12 @@
 package com.github.gingjing.plugin.gsonformat.entity;
 
+import com.github.gingjing.plugin.gsonformat.ThirdParty.treetable.java.src.org.jdesktop.swingx.ux.CellProvider;
+import com.github.gingjing.plugin.gsonformat.ThirdParty.treetable.java.src.org.jdesktop.swingx.ux.Selector;
 import com.github.gingjing.plugin.gsonformat.common.CheckUtil;
 import com.github.gingjing.plugin.gsonformat.config.Config;
 import org.apache.http.util.TextUtils;
 
-import org.jdesktop.swingx.ux.CellProvider;
-import org.jdesktop.swingx.ux.Selector;
+
 import org.json.JSONObject;
 
 /**

@@ -1,75 +1,96 @@
 package com.github.gingjing.plugin.converter.actions;
 
+import com.github.gingjing.plugin.common.constants.PluginFileConstants;
+import com.github.gingjing.plugin.common.notice.NotificationHelper;
+import com.github.gingjing.plugin.common.utils.PluginFileUtil;
 import com.github.gingjing.plugin.common.utils.PluginPsiUtil;
 import com.github.gingjing.plugin.common.utils.PluginStringUtil;
-import com.github.gingjing.plugin.converter.ymlandpro.pro2yml.Properties2Yml;
-import com.github.gingjing.plugin.converter.ymlandpro.yml2pro.Yml2Properties;
-import com.intellij.notification.Notification;
+import com.github.gingjing.plugin.converter.parser.YamlParser;
+import com.github.gingjing.plugin.generator.code.tool.CompareFileUtils;
+import com.intellij.notification.NotificationDisplayType;
+import com.intellij.notification.NotificationGroup;
 import com.intellij.notification.NotificationType;
-import com.intellij.notification.Notifications;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.Presentation;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.fileEditor.FileDocumentManager;
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.SystemInfo;
+import com.intellij.openapi.util.text.StringUtil;
+import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.vfs.impl.local.LocalFileSystemBase;
+import com.intellij.psi.PsiDirectory;
+import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiFile;
+import com.intellij.psi.PsiManager;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.IOException;
+import java.io.File;
+import java.util.Map;
 
-import static com.github.gingjing.plugin.converter.constants.MsgConstants.*;
 import static com.github.gingjing.plugin.converter.constants.YmlAndPropertiesFileConstants.*;
 
 
 /**
  * 转换yml文件与properties文件菜单
  *
- * @author xqchen
+ * @author gingjingdm
  * @date: 2020年 07月10日 00时09分
  * @version: 1.0
  */
 public class ConverterYmlPropertiesFileAction extends AnAction {
 
+    private NotificationGroup notificationGroup =
+            NotificationHelper.make("Yml Properties File Converter", NotificationDisplayType.BALLOON);;
+
     @Override
     public void actionPerformed(@NotNull final AnActionEvent event) {
-        // get file type
-        final String fileType = PluginPsiUtil.getFileType(event, true);
-        final PsiFile selectedFile = PluginPsiUtil.getSelectedFile(event, true);
-        if (PluginStringUtil.isBlank(fileType) || null == selectedFile) {
+
+        Project project = event.getProject();
+        if (project == null) {
             return;
         }
-        final VirtualFile file = selectedFile.getVirtualFile();
+        // get file type
+        final PsiFile selectedFile = PluginPsiUtil.getSelectedFile(event, true);
+        if (null == selectedFile) {
+            return;
+        }
+        final String extension = PluginFileUtil.getExtensionByFileType(selectedFile.getFileType());
+        if (PluginStringUtil.isBlank(extension)) {
+            return;
+        }
+        VirtualFile file = selectedFile.getVirtualFile();
+        VirtualFile dir = file.getParent();
 
-        ApplicationManager.getApplication().runWriteAction(() -> {
-            try {
-                @NotNull String content = new String(file.contentsToByteArray());
-                //YAML文件处理
-                if (YAML.equals(fileType)) {
-                    @NotNull String yamlContent = Yml2Properties.fromContent(content).convert();
-                    file.setCharset(file.getCharset());
-                    file.rename(this, file.getNameWithoutExtension() + PROPERTIES_SUFFIX);
-                    file.setBinaryContent(yamlContent.getBytes());
+//        VirtualFile copy = file.copy(file, dir, oldName + "_bak." + extension);
+        try {
 
-                    Notifications.Bus.notify(new Notification(GROUP_DISPLAY_ID, SUCCESS,
-                            YAML_TO_PROPERTIES, NotificationType.INFORMATION));
-                }//PROPERTIES文件处理
-                else if (PROPERTIES.equals(fileType)) {
-                    String propsContent = Properties2Yml.fromContent(content).convert();
-                    file.rename(this, file.getNameWithoutExtension() + YAML_SUFFIX);
-                    file.setBinaryContent(propsContent.getBytes());
-                    Notifications.Bus.notify(new Notification(GROUP_DISPLAY_ID, SUCCESS,
-                            PROPERTIES_TO_YAML, NotificationType.INFORMATION));
+            ApplicationManager.getApplication().runWriteAction(() -> {
+
+                if (isYaml(extension)) {
+                    Map<String, Object> yamlToFlattenedMap = YamlParser.yamlToFlattenedMap(selectedFile.getText());
+//                    System.out.println(yamlToFlattenedMap);
+                    PluginFileUtil.yml2Properties(selectedFile, file.getCharset());
+                    NotificationHelper.info("Yml Convert Properties Successfully", notificationGroup);
                 } else {
-                    Notifications.Bus.notify(new Notification(GROUP_DISPLAY_ID, INCORRECT_FILE_SELECTED,
-                            SELECT_PROPS_OR_YAML_FIRST, NotificationType.ERROR));
+                    PluginFileUtil.properties2Yaml(selectedFile, file.getCharset());
+                    NotificationHelper.info("Properties Convert Yml Successfully", notificationGroup);
                 }
-
-            } catch (IOException e) {
-                Notifications.Bus.notify(new Notification(GROUP_DISPLAY_ID,
-                        CANNOT_RENAME_FILE, e.getMessage(), NotificationType.ERROR));
-            }
-        });
+            });
+            dir.refresh(true, true);
+        } catch (Exception e) {
+            e.printStackTrace();
+            NotificationHelper.error("File Convert Failed", notificationGroup);
+        }
     }
+
+    private boolean isYaml(String extension) {
+        return PluginFileConstants.YAML_FILE_EXTENSION.equalsIgnoreCase(extension)
+                || PluginFileConstants.YML_FILE_EXTENSION.equalsIgnoreCase(extension);
+    }
+
 
     @Override
     public void update(@NotNull AnActionEvent event) {

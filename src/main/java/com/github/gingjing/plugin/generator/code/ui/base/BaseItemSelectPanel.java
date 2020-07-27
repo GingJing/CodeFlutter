@@ -351,6 +351,26 @@ public abstract class BaseItemSelectPanel<T extends Item> {
         return null;
     }
 
+    public void setItemList(List<T> itemList) {
+        this.itemList = itemList;
+    }
+
+    public void setMovable(boolean movable) {
+        this.movable = movable;
+    }
+
+    public void setLeftPanel(JPanel leftPanel) {
+        this.leftPanel = leftPanel;
+    }
+
+    public void setRightPanel(JPanel rightPanel) {
+        this.rightPanel = rightPanel;
+    }
+
+    public void setListPanel(JBList<String> listPanel) {
+        this.listPanel = listPanel;
+    }
+
     public List<T> getItemList() {
         return itemList;
     }

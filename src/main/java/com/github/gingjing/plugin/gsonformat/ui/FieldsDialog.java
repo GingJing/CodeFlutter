@@ -2,6 +2,8 @@ package com.github.gingjing.plugin.gsonformat.ui;
 
 
 import com.github.gingjing.plugin.gsonformat.ConvertBridge;
+import com.github.gingjing.plugin.gsonformat.ThirdParty.treetable.java.src.cn.vearn.checktreetable.FiledTreeTableModel;
+import com.github.gingjing.plugin.gsonformat.ThirdParty.treetable.java.src.org.jdesktop.swingx.ux.CheckTreeTableManager;
 import com.github.gingjing.plugin.gsonformat.action.DataWriter;
 import com.github.gingjing.plugin.gsonformat.common.PsiClassUtil;
 import com.github.gingjing.plugin.gsonformat.common.StringUtils;
@@ -13,10 +15,10 @@ import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElementFactory;
 import com.intellij.psi.PsiFile;
-import cn.vearn.checktreetable.*;
+
 import org.jdesktop.swingx.JXTreeTable;
 import org.jdesktop.swingx.treetable.DefaultMutableTreeTableNode;
-import org.jdesktop.swingx.ux.CheckTreeTableManager;
+
 
 
 import javax.swing.*;

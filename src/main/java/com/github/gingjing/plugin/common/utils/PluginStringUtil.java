@@ -5,9 +5,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * 字符串工具类，copy from web and spring
+ * 字符串工具类，some code copy from web and spring
  *
- * @author: someone
+ * @author: gingjingdm
  * @date: 2020年 05月05日 19时08分
  * @version: 1.0
  */

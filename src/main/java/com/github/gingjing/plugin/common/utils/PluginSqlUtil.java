@@ -10,18 +10,17 @@ import com.github.gingjing.plugin.common.visitor.ColumnTableAliasVisitor;
 import com.github.gingjing.plugin.formatter.constants.SqlFormatMessageEnum;
 import com.github.gingjing.plugin.formatter.sqlformat.SqlFormatter;
 import com.github.gingjing.plugin.formatter.sqlformat.entity.SqlEntity;
+import com.github.gingjing.plugin.generator.code.constants.MsgValue;
 import com.github.gingjing.plugin.generator.code.entity.ColumnInfo;
 import com.github.gingjing.plugin.generator.code.entity.TableInfo;
 import com.github.gingjing.plugin.generator.code.entity.TypeMapper;
 import com.github.gingjing.plugin.generator.code.tool.CurrGroupUtils;
 import com.github.gingjing.plugin.generator.code.tool.NameUtils;
+import com.github.gingjing.plugin.generator.code.tool.StringUtils;
 import com.intellij.util.ExceptionUtil;
 import org.apache.commons.collections.CollectionUtils;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**
@@ -209,28 +208,15 @@ public class PluginSqlUtil {
         }
     }
 
-    public static TableInfo initTableAndColumn(String sql, String dbType) {
-        List<SQLStatement> stmtList = SQLUtils.parseStatements(sql, dbType);
-        ColumnTableAliasVisitor visitor = new ColumnTableAliasVisitor(dbType);
-        if (stmtList == null) {
-            throw new CodeGenerateException("代码生成失败，sql语句解析失败！");
-        }
-        if (stmtList.size() > 1) {
-            throw new CodeGenerateException("代码生成失败，只支持单条建表语句！");
-        }
-        SQLStatement sqlStatement = stmtList.get(0);
-        sqlStatement.accept(visitor);
-        Collection<TableStat.Column> columns = visitor.getColumns();
-        if (PluginStringUtil.isBlank(visitor.map.get(TABLE_NAME))) {
-            throw new CodeGenerateException("代码生成失败，表名不能为空");
-        }
-        TableInfo tableInfo = new TableInfo();
-        tableInfo.setName(visitor.map.get(TABLE_NAME));
+    public static boolean isIllegalCreateSql(String createSql) {
+        return StringUtils.isEmpty(createSql) || (!createSql.contains("create") && !createSql.contains("CREATE"));
+    }
 
-        tableInfo.setComment(visitor.map.get(TABLE_COMMENT));
-        List<ColumnInfo> fullColumns = tableInfo.getFullColumn();
-        List<ColumnInfo> pkColumns = tableInfo.getPkColumn();
-        List<ColumnInfo> otherColumns = tableInfo.getOtherColumn();
+    public static TableInfo setColumns4TableInfo(ColumnTableAliasVisitor visitor, TableInfo tableInfo) {
+        Collection<TableStat.Column> columns = visitor.getColumns();
+        List<ColumnInfo> fullColumns = new ArrayList<>();
+        List<ColumnInfo> pkColumns = new ArrayList<>();
+        List<ColumnInfo> otherColumns = new ArrayList<>();
         for (TableStat.Column column : columns) {
             ColumnInfo columnInfo = new ColumnInfo();
             String columnName = column.getName();
@@ -254,6 +240,20 @@ public class PluginSqlUtil {
         tableInfo.setPkColumn(pkColumns);
         tableInfo.setOtherColumn(otherColumns);
         return tableInfo;
+    }
+
+    public static ColumnTableAliasVisitor parseAndGetVisitor(String sql, String dbType) {
+        List<SQLStatement> stmtList = SQLUtils.parseStatements(sql, dbType);
+        ColumnTableAliasVisitor visitor = new ColumnTableAliasVisitor(dbType);
+        if (stmtList == null) {
+            throw new CodeGenerateException(MsgValue.TYPE_VALIDATOR_FAILED + "，sql语句解析异常！");
+        }
+        if (stmtList.size() > 1) {
+            throw new CodeGenerateException(MsgValue.TYPE_VALIDATOR_FAILED + "，只支持单条建表语句！");
+        }
+        SQLStatement sqlStatement = stmtList.get(0);
+        sqlStatement.accept(visitor);
+        return visitor;
     }
 
     public static String getColumnType(String typeName) {

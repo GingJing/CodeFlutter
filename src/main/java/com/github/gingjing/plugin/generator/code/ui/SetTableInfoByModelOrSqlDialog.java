@@ -1,5 +1,7 @@
 package com.github.gingjing.plugin.generator.code.ui;
 
+import b.j.D;
+import com.github.gingjing.plugin.common.utils.PluginSqlUtil;
 import com.github.gingjing.plugin.generator.code.constants.MsgValue;
 import com.github.gingjing.plugin.generator.code.entity.*;
 import com.github.gingjing.plugin.generator.code.service.TableInfoService;
@@ -7,20 +9,21 @@ import com.github.gingjing.plugin.generator.code.tool.CacheDataUtils;
 import com.github.gingjing.plugin.generator.code.tool.CurrGroupUtils;
 import com.github.gingjing.plugin.generator.code.tool.DialogUtils;
 import com.github.gingjing.plugin.generator.code.tool.StringUtils;
+import com.google.common.collect.Lists;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.InputValidator;
 import com.intellij.openapi.ui.Messages;
+import com.intellij.psi.PsiElement;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
-import java.awt.event.KeyEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.awt.*;
+import java.awt.event.*;
+import java.util.*;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
+
+import static com.github.gingjing.plugin.common.utils.PluginSqlUtil.TABLE_NAME;
 
 /**
  * 表信息配置对话框，通过选取java实体或者建表语句获取表信息，并通过对话框进一步设置
@@ -30,6 +33,25 @@ import java.util.stream.Collectors;
  * @version: 1.0
  */
 public class SetTableInfoByModelOrSqlDialog extends JDialog {
+
+    /** 注释填写说明 */
+    public static final String COMMENT_NOTE = "注释填写：\n\t此处的填写请保持原样格式，请不要额外添加/*或*/";
+
+    /** 主键列说明 */
+    public static final String PK_NOTE = "主键列填写：\n\t'Y'表示是主键，'N'表示非主键，默认为'N'";
+
+    /** 类型列说明 */
+    public static final String TYPE_NOTE = "类型列填写：\n\tjava权限定名，如：java.lang.String";
+
+    /** disable列说明 */
+    public static final String DISABLE_NOTE = "disable列表填写：\n\ttrue或者false，鼠标单击即可改变值，默认为false";
+
+
+    /** 是主键 */
+    public static final String IS_PK = "Y";
+
+    /** 不是主键 */
+    public static final String NOT_PK = "N";
 
     /** 主面板 */
     private JPanel contentPane;
@@ -41,7 +63,7 @@ public class SetTableInfoByModelOrSqlDialog extends JDialog {
     private JButton buttonCancel;
 
     /** 表注释文本 */
-    private JTextField tabCmtTf;
+    private JTextArea tabCmtTf;
 
     /** 说明文本 */
     private JTextArea noteTextArea;
@@ -54,6 +76,9 @@ public class SetTableInfoByModelOrSqlDialog extends JDialog {
 
     /** 减少列事件 */
     private JButton addButton;
+
+    /** schema名称文本域 */
+    private JTextField schemaTextField;
 
     /** 表信息 */
     private TableInfo tableInfo;
@@ -73,20 +98,36 @@ public class SetTableInfoByModelOrSqlDialog extends JDialog {
     /** 初始化标记 */
     private boolean initFlag;
 
+    /** 项目 */
     private Project project;
 
     public SetTableInfoByModelOrSqlDialog(Project project) {
         this.project = project;
         this.cacheDataUtils = CacheDataUtils.getInstance();
         this.tableInfoService = TableInfoService.getInstance(project);
-
+        this.tabCmtTf.setAutoscrolls(true);
+        this.noteTextArea.setEnabled(false);
         setContentPane(contentPane);
         setModal(true);
         getRootPane().setDefaultButton(buttonOK);
 
         buttonOK.setText(cacheDataUtils.isDebugging() ? "确定" : "选择路径");
 
-        buttonOK.addActionListener(e -> onOK());
+        buttonOK.addMouseListener(new MouseAdapter() {
+            /**
+             * {@inheritDoc}
+             *
+             * @param e
+             */
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                System.out.println(e.getButton());
+                if (e.getButton() == MouseEvent.BUTTON1) {
+                    onOK();
+                }
+            }
+        });
+
 
         buttonCancel.addActionListener(e -> onCancel());
 
@@ -106,6 +147,9 @@ public class SetTableInfoByModelOrSqlDialog extends JDialog {
     }
 
     private void onOK() {
+        if (StringUtils.isEmpty(schemaTextField.getText())) {
+            Messages.showErrorDialog("请填写schema名称", MsgValue.TITLE_INFO);
+        }
         // add your code here
         this.tableInfoService.save(tableInfo);
         if (!cacheDataUtils.isDebugging()) {
@@ -130,11 +174,25 @@ public class SetTableInfoByModelOrSqlDialog extends JDialog {
 
         this.tableInfo = cacheDataUtils.getCreateMode().getTableInfoAndConfig(tableInfoService, cacheDataUtils);
 
+        this.schemaTextField.setText(cacheDataUtils.getSchema());
+
+        this.noteTextArea.setText(initNote());
+
         this.tabCmtTf.setText(tableInfo.getComment());
+        this.tabCmtTf.setAutoscrolls(true);
 
         refresh();
 
         this.initFlag = true;
+    }
+
+    private String initNote() {
+        return new StringJoiner(System.lineSeparator())
+                .add(COMMENT_NOTE)
+                .add(PK_NOTE)
+                .add(TYPE_NOTE)
+                .add(DISABLE_NOTE)
+                .toString();
     }
 
     /**
@@ -160,20 +218,22 @@ public class SetTableInfoByModelOrSqlDialog extends JDialog {
         this.tableInfo.setComment(StringUtils.isEmpty(tabCmtTf.getText()) ? tableInfo.getComment() : tabCmtTf.getText());
         this.tableModel = new DefaultTableModel();
         this.columnConfigList.forEach(columnConfig -> tableModel.addColumn(columnConfig.getTitle()));
-        Set<String> pkColumns = tableInfo.getPkColumn().stream().map(ColumnInfo::getName).collect(Collectors.toSet());
+        Set<String> pkColumns =
+                Optional.ofNullable(tableInfo.getPkColumn())
+                        .orElseGet(ArrayList::new)
+                        .stream()
+                        .map(ColumnInfo::getName)
+                        .collect(Collectors.toSet());
         //追加数据
         this.tableInfo.getFullColumn().forEach(columnInfo -> {
             List<Object> dataList = new ArrayList<>();
             dataList.add(columnInfo.getName());
-            JCheckBox isPkCx = new JCheckBox();
-            isPkCx.setVisible(true);
-            isPkCx.setSelected(pkColumns.contains(columnInfo.getName()));
-            dataList.add(isPkCx);
+            dataList.add(pkColumns.contains(columnInfo.getName()) ? IS_PK : NOT_PK);
             dataList.add(columnInfo.getType());
             dataList.add(columnInfo.getComment());
             //渲染附加数据
             if (columnInfo.getExt() != null && !columnInfo.getExt().isEmpty()) {
-                // 跳过默认的3条数据
+                // 跳过默认的4条数据
                 for (int i = 4; i < tableModel.getColumnCount(); i++) {
                     dataList.add(columnInfo.getExt().get(tableModel.getColumnName(i)));
                 }
@@ -209,13 +269,12 @@ public class SetTableInfoByModelOrSqlDialog extends JDialog {
                     columnInfo.setName((String) val);
                     break;
                 case 1:
-                    if (((JCheckBox)val).isSelected()) {
-                        Set<String> pks = tableInfo.getPkColumn().stream().map(ColumnInfo::getName).collect(Collectors.toSet());
+                    Set<String> pks = tableInfo.getPkColumn().stream().map(ColumnInfo::getName).collect(Collectors.toSet());
+                    if (IS_PK.equals(String.valueOf(val))) {
                         if (!pks.contains(columnInfo.getName())) {
                             tableInfo.getPkColumn().add(columnInfo);
                         }
                     } else {
-                        Set<String> pks = tableInfo.getPkColumn().stream().map(ColumnInfo::getName).collect(Collectors.toSet());
                         if (pks.contains(columnInfo.getName())) {
                             tableInfo.getPkColumn().removeIf(c -> c.getName().equals(columnInfo.getName()));
                             tableInfo.getOtherColumn().add(columnInfo);
@@ -311,8 +370,19 @@ public class SetTableInfoByModelOrSqlDialog extends JDialog {
         });
     }
 
+    private String name() {
+        switch (cacheDataUtils.getCreateMode()) {
+            case SELECT_MODEL:
+                return cacheDataUtils.getSelectClass().getName();
+            case CREATE_SQL:
+                return PluginSqlUtil.parseAndGetVisitor(cacheDataUtils.getCurrCreateSql(), cacheDataUtils.getCurrDbType()).map.get(TABLE_NAME);
+            default:
+                return cacheDataUtils.getSelectDbTable().getName();
+        }
+    }
+
     public void open() {
-        setTitle("Generate Config For " + cacheDataUtils.getSelectClass().getName());
+        setTitle("Generate Config For " + name());
         pack();
         setLocationRelativeTo(null);
         setVisible(true);

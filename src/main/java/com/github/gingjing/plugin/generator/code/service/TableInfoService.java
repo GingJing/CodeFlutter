@@ -50,13 +50,6 @@ public interface TableInfoService {
     TableInfo getTableInfoByModel(PsiClass javaClass);
 
     /**
-     * 解析PsiClass获取初步的tableInfo
-     * @param psiClass 类
-     * @return tableInfo信息
-     */
-    TableInfo parseTableInfoByClass(PsiClass psiClass);
-
-    /**
      * 通过建表sql语句获取TableInfo
      *
      * @param createSql 建表语句
@@ -109,7 +102,7 @@ public interface TableInfoService {
      * @param dbTables 原始表对象
      * @return 表信息对象
      */
-    default List<TableInfo> getTableInfoAndConfig(Collection<DbTable> dbTables) {
+    default List<TableInfo> getTableInfoListAndConfig(Collection<DbTable> dbTables) {
         if (CollectionUtil.isEmpty(dbTables)) {
             return Collections.EMPTY_LIST;
         }
@@ -117,6 +110,23 @@ public interface TableInfoService {
         dbTables.forEach(dbTable -> tableInfoList.add(this.getTableInfoAndConfig(dbTable)));
         return tableInfoList;
     }
+
+    /**
+     * 类型校验，如果存在未知类型则引导用于去条件类型
+     *
+     * @param psiClass 选中的javabean类
+     * @return 是否验证通过
+     */
+    boolean typeValidator(PsiClass psiClass);
+
+
+    /**
+     * 类型校验，如果存在未知类型则引导用于去条件类型
+     *
+     * @param createSql 检表语句
+     * @return 是否验证通过
+     */
+    boolean typeValidator(String createSql);
 
     /**
      * 类型校验，如果存在未知类型则引导用于去条件类型

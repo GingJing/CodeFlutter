@@ -76,4 +76,28 @@ public class ListCheckboxPanel extends JPanel {
         });
         return result;
     }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public Collection<String> getItems() {
+        return items;
+    }
+
+    public void setItems(Collection<String> items) {
+        this.items = items;
+    }
+
+    public List<JBCheckBox> getCheckBoxList() {
+        return checkBoxList;
+    }
+
+    public void setCheckBoxList(List<JBCheckBox> checkBoxList) {
+        this.checkBoxList = checkBoxList;
+    }
 }

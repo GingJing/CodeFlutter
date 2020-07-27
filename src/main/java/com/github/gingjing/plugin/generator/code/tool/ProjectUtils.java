@@ -27,9 +27,9 @@ import static com.intellij.database.util.DasUtil.getTables;
 /**
  * IDEA项目相关工具
  *
- * @author tangcent
+ * @author gingjingdm
  * @version 1.0.0
- * @since 2020/02/14 18:35
+ * @since 2020/05/14 18:35
  */
 public class ProjectUtils {
 

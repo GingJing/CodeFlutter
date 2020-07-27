@@ -2,9 +2,12 @@ package com.github.gingjing.plugin.generator.code.ui;
 
 import com.alibaba.druid.util.JdbcConstants;
 import com.github.gingjing.plugin.common.utils.PluginStringUtil;
+import com.github.gingjing.plugin.generator.code.entity.CreateModeEnum;
 import com.github.gingjing.plugin.generator.code.tool.CacheDataUtils;
+import com.github.gingjing.plugin.generator.code.tool.StringUtils;
 import com.google.common.collect.ImmutableList;
 import com.intellij.openapi.ui.ComboBox;
+import com.intellij.openapi.ui.Messages;
 import com.intellij.ui.CollectionComboBoxModel;
 
 import javax.swing.*;
@@ -12,6 +15,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
+
+import static com.github.gingjing.plugin.generator.code.constants.MsgValue.SQL_TITLE;
 
 /**
  * 建表sql输入对话框
@@ -30,6 +35,7 @@ public class CreateSqlDialog extends JDialog {
     private String dbType;
 
     private JTextArea sqlTextArea;
+    private JTextField schemaTextField;
 
     private CacheDataUtils cacheDataUtils;
 
@@ -39,9 +45,12 @@ public class CreateSqlDialog extends JDialog {
         setModal(true);
         getRootPane().setDefaultButton(buttonOK);
         this.cacheDataUtils = CacheDataUtils.getInstance();
+        init();
         buttonOK.addActionListener(e -> onOK());
 
         buttonCancel.addActionListener(e -> onCancel());
+
+        setBounds(0, 0, 500, 500);
 
         // call onCancel() when cross is clicked
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -82,15 +91,25 @@ public class CreateSqlDialog extends JDialog {
                         .add(JdbcConstants.MOCK)
                         .build().asList())
         );
-        ComboBox<String> cbx = new ComboBox<>(dbTypeCbxModel);
-        cbx.setSelectedItem(JdbcConstants.MYSQL);
-        cbx.addActionListener(e -> dbType = (String) cbx.getSelectedItem());
+        dbComboBox.setModel(dbTypeCbxModel);
+        dbComboBox.setSelectedItem(JdbcConstants.MYSQL);
+        dbComboBox.addActionListener(e -> dbType = (String) dbComboBox.getSelectedItem());
     }
 
     private void onOK() {
         // add your code here
+        if (StringUtils.isEmpty(this.sqlTextArea.getText())) {
+            Messages.showErrorDialog("请输入语句", SQL_TITLE);
+            return;
+        }
+        if (StringUtils.isEmpty(this.schemaTextField.getText())) {
+            Messages.showErrorDialog("请输入schema名称", SQL_TITLE);
+            return;
+        }
+        this.cacheDataUtils.setSchema(schemaTextField.getText());
         this.cacheDataUtils.setCurrDbType(PluginStringUtil.isBlank(dbType) ? JdbcConstants.MYSQL : dbType);
         this.cacheDataUtils.setCurrCreateSql(this.sqlTextArea.getText());
+        this.cacheDataUtils.setCreateMode(CreateModeEnum.CREATE_SQL);
         dispose();
     }
 

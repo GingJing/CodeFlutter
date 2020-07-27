@@ -1,5 +1,6 @@
 package com.github.gingjing.plugin.converter.actions;
 
+import com.github.gingjing.plugin.common.notice.NotificationHelper;
 import com.github.gingjing.plugin.common.utils.PluginJsonUtil;
 import com.github.gingjing.plugin.converter.ui.ShowPojo2JsonDialog;
 import com.github.gingjing.plugin.generator.code.tool.DialogUtils;
@@ -20,6 +21,7 @@ import com.intellij.psi.javadoc.PsiDocComment;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.PsiShortNamesCache;
 import com.intellij.psi.util.PsiTreeUtil;
+import com.intellij.psi.util.PsiTypesUtil;
 import org.apache.commons.lang.ArrayUtils;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
@@ -28,6 +30,7 @@ import org.jetbrains.annotations.NotNull;
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
+import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -45,7 +48,8 @@ import java.util.List;
  */
 public class TransformJavaToJsonAction extends AnAction {
 
-    private static NotificationGroup notificationGroup;
+    private static NotificationGroup notificationGroup =
+            NotificationHelper.make("Java2Json.NotificationGroup", NotificationDisplayType.BALLOON);
 
     /**
      * 字段
@@ -66,18 +70,15 @@ public class TransformJavaToJsonAction extends AnAction {
     private static final Map<String, Object> NORMAL_TYPES = new HashMap<>();
 
     static {
-        notificationGroup = new NotificationGroup("Java2Json.NotificationGroup", NotificationDisplayType.BALLOON, true);
-
-
         NORMAL_TYPES.put("Boolean", false);
         NORMAL_TYPES.put("Byte", 0);
         NORMAL_TYPES.put("Short", (short) 0);
         NORMAL_TYPES.put("Integer", 0);
         NORMAL_TYPES.put("Long", 0L);
-        NORMAL_TYPES.put("Float", 0.0F);
-        NORMAL_TYPES.put("Double", 0.0D);
+        NORMAL_TYPES.put("Float", 0F);
+        NORMAL_TYPES.put("Double", 0D);
         NORMAL_TYPES.put("String", "str");
-        NORMAL_TYPES.put("BigDecimal", 0.0);
+        NORMAL_TYPES.put("BigDecimal", BigDecimal.ZERO);
         NORMAL_TYPES.put("Date", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
         NORMAL_TYPES.put("Timestamp", System.currentTimeMillis());
         NORMAL_TYPES.put("LocalDate", LocalDate.now().toString());
@@ -140,8 +141,7 @@ public class TransformJavaToJsonAction extends AnAction {
         }
 
         if (!selectedClass.getContainingFile().getFileType().getDefaultExtension().endsWith(JavaFileType.DEFAULT_EXTENSION)) {
-            Notification notification = notificationGroup.createNotification("Selection is not a POJO.", NotificationType.ERROR);
-            Notifications.Bus.notify(notification, project);
+            NotificationHelper.error("Selection is not a POJO.", notificationGroup);
             return;
         }
         try {
@@ -156,12 +156,9 @@ public class TransformJavaToJsonAction extends AnAction {
             StringSelection selection = new StringSelection(PluginJsonUtil.formatByGson(jsonString));
             Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
             clipboard.setContents(selection, selection);
-            String message = "Convert " + finalSelectedClass.getName() + " to JSON success, copied to the clipboard.";
-            Notification notification = notificationGroup.createNotification(message, NotificationType.INFORMATION);
-            Notifications.Bus.notify(notification, project);
+            NotificationHelper.info( "Convert " + finalSelectedClass.getName() + " to JSON success, copied to the clipboard.", notificationGroup);
         } catch (Exception var15) {
-            Notification notification = notificationGroup.createNotification("Generate JSON failed.", NotificationType.ERROR);
-            Notifications.Bus.notify(notification, project);
+            NotificationHelper.error("Generate JSON failed.", notificationGroup);
         }
     }
 
@@ -201,23 +198,7 @@ public class TransformJavaToJsonAction extends AnAction {
     private Object getObjectForField(PsiField psiField, Project project) {
         PsiType type = psiField.getType();
         if (type instanceof PsiPrimitiveType) {
-            if (type.equals(PsiType.INT)) {
-                return 0;
-            } else if (type.equals(PsiType.BOOLEAN)) {
-                return Boolean.TRUE;
-            } else if (type.equals(PsiType.BYTE)) {
-                return Byte.valueOf("1");
-            } else if (type.equals(PsiType.CHAR)) {
-                return '-';
-            } else if (type.equals(PsiType.DOUBLE)) {
-                return 0.0D;
-            } else if (type.equals(PsiType.FLOAT)) {
-                return 0.0F;
-            } else if (type.equals(PsiType.LONG)) {
-                return 0L;
-            } else {
-                return type.equals(PsiType.SHORT) ? Short.valueOf("0") : type.getPresentableText();
-            }
+            return PsiTypesUtil.getDefaultValue(type);
         } else {
             String typeName = type.getPresentableText();
             Object value = NORMAL_TYPES.get(typeName);

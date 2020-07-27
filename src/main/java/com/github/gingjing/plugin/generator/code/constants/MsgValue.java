@@ -41,6 +41,15 @@ public class MsgValue {
     /** 类型校验标题 */
     public static final String TYPE_VALIDATOR = "字段类型校验";
 
+    /** 通过建表语句生成代码失败 */
+    public static final String CREATE_BY_SQL_FAILED = "通过建表语句生成代码失败";
+
+    /** 字段类型校验失败 */
+    public static final String TYPE_VALIDATOR_FAILED = "字段类型校验失败";
+
+    /** sql标题 */
+    public static final String SQL_TITLE = "Sql Title Info";
+
     /** 数据库字段类型映射关系未找到 */
     public static final String DATABASE_CONFIG_TYPE_NOT_EXIST = "数据库类型%s，没有找到映射关系，是否去添加？";
 

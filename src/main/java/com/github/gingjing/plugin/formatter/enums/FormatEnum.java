@@ -1,6 +1,7 @@
 package com.github.gingjing.plugin.formatter.enums;
 
 import com.github.gingjing.plugin.common.constants.PluginConstants;
+import com.github.gingjing.plugin.generator.code.tool.StringUtils;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.EditorFactory;
@@ -70,6 +71,9 @@ public enum FormatEnum {
 
     @Nullable
     protected Editor doGetEditor(Project project, String str) {
+        if (StringUtils.isEmpty(str)) {
+            return null;
+        }
         EditorFactory editorFactory = EditorFactory.getInstance();
         PsiFileFactory psiFileFactory = PsiFileFactory.getInstance(project);
         FileType fileType = FileTypeManager.getInstance().getFileTypeByExtension(getValue());

@@ -11,8 +11,8 @@ public class MsgConstants {
 
     /* ====================================== yml and properties file ==================================== */
 
-    public final static String NO_FILE_SELECTED = "No file selected";
-    public final static String SELECT_FILE_FIRST = "Please select file first";
+    public final static String NO_FILE_SELECTED = "未选择文件";
+    public final static String SELECT_FILE_FIRST = "请先选择文件";
     public final static String YAML_TO_PROPERTIES = "YAML file has successfully converted Properties file";
     public final static String PROPERTIES_TO_YAML = "Properties file has successfully converted YAML file";
     public final static String SUCCESS = "Success";
