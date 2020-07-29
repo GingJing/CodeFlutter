@@ -1,5 +1,5 @@
 # CodeFlutter
-#### Note: This plugin only support the IntelliJ Version which since 192.5728.98
+#### Note: This plugin only support the IntelliJ IDEA Version which since 192.5728.98
 
 This plug-in is mainly used to help programmers make coding easier in projects.
 
@@ -24,6 +24,7 @@ Part of the source code refers to the following plug-ins:
 * <a href="https://github.com/starcwang/easy_javadoc">easy_javadoc</a>
 * <a href="https://github.com/jineshfrancs/AwesomePojoGenerator">AwesomePojoGenerator</a>
 * <a href="https://gitee.com/Chave-Z/CodingEasier">CodingEasier</a>
+* <a href="https://github.com.cnpmjs.org/zzz40500/">GsonFormat</a>
 
 #####  If you like those plugin please star them
 

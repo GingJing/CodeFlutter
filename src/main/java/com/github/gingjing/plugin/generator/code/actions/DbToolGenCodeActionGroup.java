@@ -1,5 +1,6 @@
 package com.github.gingjing.plugin.generator.code.actions;
 
+import com.github.gingjing.plugin.generator.code.entity.CreateModeEnum;
 import com.github.gingjing.plugin.generator.code.tool.CacheDataUtils;
 import com.intellij.codeInsight.generation.actions.BaseGenerateAction;
 import com.intellij.database.psi.DbTable;
@@ -93,6 +94,7 @@ public class DbToolGenCodeActionGroup extends ActionGroup {
         }
 
         //保存数据到缓存
+        cacheDataUtils.setCreateMode(CreateModeEnum.DATABASE_TOOL);
         cacheDataUtils.setDbTableList(dbTableList);
         cacheDataUtils.setSelectDbTable(selectDbTable);
         this.notExistsChildren = false;
