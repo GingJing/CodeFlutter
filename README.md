@@ -12,7 +12,7 @@ It is a small plug-in that integrate som functions, such as:
 3. Format Sql, Xml, Json and HighLither
 4. Translate Online
 5. Generate JavaDoc Annotation
-6. Populate Mybatis Console Login Sql Placeholder With Value And Format
+6. Populate Mybatis Console Log Sql Placeholder With Value And Format
 
 ---
 
