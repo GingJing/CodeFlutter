@@ -17,8 +17,16 @@
 
 > ------
 
-> If you have some question please issue me at one of the follow address: 
+> **Plug-in guide** Please click one of the links:
+>
+> [Internal](https://gitee.com/gingjingdm/CodeFlutter/blob/master/CodeFlutter%E6%95%99%E7%A8%8B/%E6%8F%92%E4%BB%B6%E8%AF%B4%E6%98%8E.md)
 > 
+> [abroad](https://github.com/GingJing/CodeFlutter/blob/master/CodeFlutter%E6%95%99%E7%A8%8B/%E6%8F%92%E4%BB%B6%E8%AF%B4%E6%98%8E.md)
+
+>---
+
+> If you have some question please issue me at one of the follow address: 
+>
 >  **GitHub: **[CodeFlutter](https://github.com/GingJing/CodeFlutter) 
 >  **Gitee: **[CodeFlutter](https://gitee.com/gingjingdm/CodeFlutter)
 
