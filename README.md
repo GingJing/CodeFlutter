@@ -27,8 +27,9 @@
 
 > If you have some question please issue me at one of the follow address: 
 >
->  **GitHub: **[CodeFlutter](https://github.com/GingJing/CodeFlutter) 
->  **Gitee: **[CodeFlutter](https://gitee.com/gingjingdm/CodeFlutter)
+>  <strong>GitHub: </strong>[CodeFlutter](https://github.com/GingJing/CodeFlutter) 
+>
+>  <strong>Gitee: </strong>[CodeFlutter](https://gitee.com/gingjingdm/CodeFlutter)
 
 > ------
 
