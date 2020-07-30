@@ -16,7 +16,11 @@ It is a small plug-in that integrate som functions, such as:
 
 ---
 
-If you have some question please issue me [CodeFlutter](https://github.com/GingJing/CodeFlutter)
+If you have some question please issue me at one of the follow address: 
+
+**GitHub: **[CodeFlutter](https://github.com/GingJing/CodeFlutter) 
+
+**Gitee: **[CodeFlutter](https://gitee.com/gingjingdm/CodeFlutter)
 
 Part of the source code refers to the following plug-ins:
 
