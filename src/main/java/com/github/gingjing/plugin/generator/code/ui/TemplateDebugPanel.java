@@ -29,12 +29,17 @@ import com.intellij.openapi.editor.ex.EditorEx;
 import com.intellij.openapi.editor.highlighter.EditorHighlighterFactory;
 import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.fileTypes.FileTypeManager;
+import com.intellij.openapi.module.Module;
+import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.DialogBuilder;
 import com.intellij.openapi.ui.MessageDialogBuilder;
 import com.intellij.openapi.util.Conditions;
 import com.intellij.psi.*;
+import com.intellij.psi.impl.JavaPsiFacadeImpl;
+import com.intellij.psi.search.GlobalSearchScope;
+import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.testFramework.LightVirtualFile;
 import com.intellij.ui.CollectionComboBoxModel;
 import com.intellij.util.containers.JBIterable;
@@ -76,15 +81,8 @@ public class TemplateDebugPanel {
         // 主面板
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 
-        // 创建调试模式选择下拉框
+        // 添加实时调试标签
         panel.add(new JLabel("选择实时调试方式"));
-        ComboBoxModel<CreateModeEnum> modeCbxModel =
-                new CollectionComboBoxModel<>(Arrays.asList(CreateModeEnum.DATABASE_TOOL, CreateModeEnum.SELECT_MODEL));
-        ComboBox<CreateModeEnum> modeCbx = new ComboBox<>(modeCbxModel);
-        modeCbx.setSelectedIndex(0);
-        CacheDataUtils.getInstance().setCreateMode(CreateModeEnum.DATABASE_TOOL);
-        // 添加调式模式选择下拉框
-        panel.add(modeCbx);
 
         // 创建数据库表名列表下拉框
         List<String> tableList = new ArrayList<>();
@@ -93,8 +91,19 @@ public class TemplateDebugPanel {
         ComboBox<String> tableNameCbx = new ComboBox<>(tableNameCbxModel);
         if (!CollectionUtil.isEmpty(dataSourceList)) {
             dataSourceList.forEach(dbDataSource -> getTables(dbDataSource).forEach(table -> tableList.add(table.toString())));
+            tableNameCbx.setSelectedItem(tableList.get(0));
+            CacheDataUtils.getInstance().setCreateMode(CreateModeEnum.DATABASE_TOOL);
+        } else {
+            CacheDataUtils.getInstance().setCreateMode(CreateModeEnum.SELECT_MODEL);
         }
-        tableNameCbx.setSelectedItem(tableList.get(0));
+
+        // 创建调试模式选择下拉框
+        ComboBoxModel<CreateModeEnum> modeCbxModel =
+                new CollectionComboBoxModel<>(Arrays.asList(CreateModeEnum.DATABASE_TOOL, CreateModeEnum.SELECT_MODEL));
+        ComboBox<CreateModeEnum> modeCbx = new ComboBox<>(modeCbxModel);
+        modeCbx.setSelectedIndex(0);
+        // 添加调式模式选择下拉框
+        panel.add(modeCbx);
 
         // 初始化调试动作组按钮
         DbToolDebuggerAction dbToolDebuggerAction = new DbToolDebuggerAction(tableNameCbx, AllIcons.Actions.Rerun);
